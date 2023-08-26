@@ -11,6 +11,12 @@ jobs:
         with:
           lfs: true
 
+      - name: get short sha
+        uses: benjlevesque/short-sha@v2.2
+        id: short-sha
+        with:
+          length: 6
+
       - name: install required packages 
         run: |
           sudo apt update
@@ -37,10 +43,18 @@ jobs:
           export_as_pack: true
           cache: true
 
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: "Project Heartbeat.pck"
+          path: "${{ steps.export.outputs.build_directory }}/Dev Pack/Project Heartbeat.pck"
+
       - name: create release
         uses: ncipollo/release-action@v1.12.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           generateReleaseNotes: true
-          tag: ${{ github.ref_name }}-${{ github.sha }}-alpha
-          artifacts: ${{ steps.export.outputs.archive_directory }}/*
+          makeLatest: true
+          tag: ${{ github.ref_name }}-${{ steps.short-sha.outputs.sha }}-alpha
+          name: "Alpha build for branch ${{ github.ref_name }} (commit ${{ steps.short-sha.outputs.sha }})."
+          artifacts: "${{ steps.export.outputs.build_directory }}/Dev Pack/Project Heartbeat.pck"
