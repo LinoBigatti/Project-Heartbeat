@@ -12,7 +12,7 @@ script = ExtResource("1")
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 196.0
-offset_bottom = 61.0
+offset_bottom = 75.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2

@@ -1,4 +1,4 @@
-extends AcceptDialog
+extends HBEditorAcceptDialog
 @onready var song_selector = get_node("%SongSelector")
 
 enum SELECTOR_MODE {

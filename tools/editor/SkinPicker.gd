@@ -1,4 +1,4 @@
-extends ConfirmationDialog
+extends HBEditorConfirmationDialog
 
 class_name HBEditorSkinPicker
 

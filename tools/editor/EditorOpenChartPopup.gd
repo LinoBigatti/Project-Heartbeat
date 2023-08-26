@@ -1,4 +1,4 @@
-extends ConfirmationDialog
+extends HBEditorConfirmationDialog
 
 @onready var tree = get_node("MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/Tree")
 @onready var new_song_button = get_node("MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerSong/NewSongButton")
@@ -142,7 +142,7 @@ func _on_about_to_show():
 	populate_tree()
 
 func _show_meta_editor():
-	song_meta_editor.hidden = tree.get_selected().get_meta("hidden")
+	song_meta_editor.visible = not tree.get_selected().get_meta("hidden")
 	song_meta_editor.song_meta = tree.get_selected().get_meta("song")
 	
 	song_meta_editor_dialog.size = Vector2.ZERO

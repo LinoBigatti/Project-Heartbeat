@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://fawgnyddv8a"]
+[gd_scene load_steps=45 format=3 uid="uid://fawgnyddv8a"]
 
 [ext_resource type="PackedScene" uid="uid://b3peah64ej2iw" path="res://menus/visualizer/Visualizer.tscn" id="1"]
 [ext_resource type="PackedScene" uid="uid://c0p0ql3vtldti" path="res://rythm_game/game_modes/heartbeat/HeartbeatRhythmGameUI.tscn" id="2"]
@@ -35,7 +35,9 @@
 [ext_resource type="Texture2D" uid="uid://be35kgs7xupk1" path="res://tools/icons/icon_snap_grid.svg" id="34"]
 [ext_resource type="Script" path="res://tools/editor/EditorContextualMenuControl.gd" id="35"]
 [ext_resource type="Script" path="res://rythm_game/SongBackground.gd" id="36"]
+[ext_resource type="Script" path="res://tools/editor/controls/HBEditorConfirmationDialog.gd" id="36_pa3p1"]
 [ext_resource type="Texture2D" uid="uid://ccyvxr16477o5" path="res://tools/icons/icon_GUI_visibility_visible.svg" id="37"]
+[ext_resource type="Script" path="res://tools/editor/controls/HBEditorAcceptDialog.gd" id="37_udmor"]
 [ext_resource type="Script" path="res://tools/editor/MessageShower.gd" id="43"]
 [ext_resource type="Script" path="res://tools/editor/controls/HBEditorSpinBox.gd" id="50"]
 [ext_resource type="Script" path="res://rythm_game/VideoPlayerOffset.gd" id="51"]
@@ -541,15 +543,18 @@ theme = ExtResource("4")
 dialog_text = "This chart has unsaved changes.
 Any unsaved progress will be lost."
 dialog_autowrap = true
+script = ExtResource("36_pa3p1")
 
 [node name="OpenChartPopupDialog" parent="Popups" groups=["block_shortcuts"] instance=ExtResource("10")]
 
 [node name="PluginErrorDialog" type="AcceptDialog" parent="Popups" groups=["block_shortcuts"]]
 dialog_text = "Plugin ERROR!"
 dialog_autowrap = true
+script = ExtResource("37_udmor")
 
 [node name="FirstTimeMessageDialog" type="AcceptDialog" parent="Popups" groups=["block_shortcuts"]]
 theme = ExtResource("4")
+script = ExtResource("37_udmor")
 
 [node name="Label2" type="VBoxContainer" parent="Popups/FirstTimeMessageDialog"]
 offset_left = 8.0
@@ -582,6 +587,7 @@ visible = false
 theme = ExtResource("4")
 dialog_text = "You're not allowed to cum
 inside Rin Kagamine."
+script = ExtResource("37_udmor")
 
 [node name="ContextualMenu" type="PopupMenu" parent="Popups"]
 unique_name_in_owner = true
@@ -595,6 +601,7 @@ theme = ExtResource("4")
 dialog_text = "This chart has no tempo map.
 Please create a timing change before adding notes."
 dialog_autowrap = true
+script = ExtResource("37_udmor")
 
 [node name="RhythmGamePlaytestPopup" parent="." instance=ExtResource("7")]
 visible = false

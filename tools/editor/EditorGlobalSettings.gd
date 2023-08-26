@@ -1,4 +1,4 @@
-extends Window
+extends HBEditorWindow
 
 @onready var tab_container = get_node("TabContainer")
 

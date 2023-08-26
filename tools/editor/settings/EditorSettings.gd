@@ -228,6 +228,7 @@ func create_item(option, parent):
 			
 			var popup := Window.new()
 			popup.title = option.name
+			popup.visible = false
 			popup.add_child(color_picker)
 			add_child(popup)
 			item.set_meta("popup", popup)

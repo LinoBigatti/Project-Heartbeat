@@ -708,10 +708,10 @@ func apply_fine_position():
 
 func show_contextual_menu():
 	contextual_menu.popup()
-	var popup_offset = get_global_mouse_position() + contextual_menu.size - get_viewport_rect().size
+	var popup_offset = get_global_mouse_position() + Vector2(contextual_menu.size) - get_viewport_rect().size
 	popup_offset.x = max(popup_offset.x, 0)
 	popup_offset.y = max(popup_offset.y, 0)
-	contextual_menu.set_global_position(get_global_mouse_position() - popup_offset)
+	contextual_menu.position = get_global_mouse_position() - popup_offset
 
 # Changes the properties of the selected items, but doesn't commit it to undo_redo, to
 # prevent creating more undo_redo actions than necessary, thus undoing constant 
@@ -2375,7 +2375,7 @@ func _toggle_settings_popup():
 	if settings_editor.visible:
 		settings_editor.hide()
 	else:
-		settings_editor.popup_centered()
+		settings_editor.popup_centered_ratio()
 
 func shortcuts_blocked() -> bool:
 	if rhythm_game_playtest_popup in get_children():
