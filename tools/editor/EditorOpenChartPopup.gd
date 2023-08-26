@@ -149,7 +149,7 @@ func _show_meta_editor():
 	song_meta_editor_dialog.popup_centered_clamped(Vector2(500, 650))
 	song_meta_editor_dialog.get_ok_button().disabled = tree.get_selected().get_meta("hidden")
 
-func _on_CreateSongDialog_confirmed():
+func _on_CreateSongDialog_3confirmed():
 	if $CreateSongDialog/VBoxContainer/LineEdit.text != "":
 		var song_name = HBUtils.get_valid_filename($CreateSongDialog/VBoxContainer/LineEdit.text)
 		if song_name != "":
