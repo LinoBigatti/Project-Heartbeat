@@ -15,3 +15,5 @@ steam_api64.dll
 .directory
 *~
 
+# songs/ should not be included with the source release
+songs/
