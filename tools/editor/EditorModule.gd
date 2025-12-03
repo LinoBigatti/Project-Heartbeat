@@ -52,6 +52,16 @@ func set_editor(_editor: HBEditor):
 	for transform in transforms:
 		transform.set_editor(editor)
 
+func add_preview_tool(tool: Control):
+	editor.game_preview.add_child(tool)
+	editor.game_preview.clip_contents = true
+
+func add_preview_widget(widget: HBEditorWidget):
+	editor.game_preview.widget_area.add_child(widget)
+	
+	if not editor.game_preview.widget_area.is_connected("widget_area_input", Callable(widget, "_widget_area_input")):
+		editor.game_preview.widget_area.connect("widget_area_input", Callable(widget, "_widget_area_input"))
+
 func song_editor_settings_changed(settings: HBPerSongEditorSettings):
 	pass
 

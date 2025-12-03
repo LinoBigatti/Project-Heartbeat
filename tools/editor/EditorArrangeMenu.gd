@@ -6,6 +6,7 @@ signal angle_changed(new_angle, reverse, autoangle_toggle)
 
 @onready var clip_mask = get_node("Control")
 @onready var arc_drawer = get_node("Control/Control")
+@onready var ring_drawer = get_node("Control/Control2")
 @onready var reverse_indicator = get_node("Control/ReverseIndicator")
 
 var editor : set = set_editor
@@ -128,7 +129,7 @@ func _process(delta):
 	clip_mask.global_position = clip.position
 	clip_mask.size = clip.size
 	
-	$Control/Control2.position = Vector2(120, 120) - clip_mask.position
+	ring_drawer.position = Vector2(120, 120) - clip_mask.position
 	arc_drawer.position = Vector2(120, 120) - clip_mask.position
 	reverse_indicator.position = Vector2(161, 169) - clip_mask.position
 	

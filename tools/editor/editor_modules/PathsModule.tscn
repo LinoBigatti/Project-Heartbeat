@@ -1,0 +1,201 @@
+[gd_scene load_steps=14 format=3 uid="uid://bj3f8gk8edyqb"]
+
+[ext_resource type="PackedScene" uid="uid://pr5h8mdaei60" path="res://tools/editor/EditorModule.tscn" id="1_jyymo"]
+[ext_resource type="Script" uid="uid://djsjnsfgxav06" path="res://tools/editor/editor_modules/PathsModule.gd" id="2_1jvfs"]
+[ext_resource type="Script" uid="uid://d3nluthy6ngac" path="res://menus/HBoxRatioContainer.gd" id="3_yvv5k"]
+[ext_resource type="Script" uid="uid://cfed4elquwuh3" path="res://tools/editor/controls/HBEditorButton.gd" id="4_kgm5p"]
+[ext_resource type="Texture2D" uid="uid://cv5mtgvq58ugk" path="res://graphics/icons/arc-clockwise-inside.svg" id="5_8xg14"]
+[ext_resource type="Texture2D" uid="uid://v0wdc06kgiow" path="res://graphics/icons/arc-counterclockwise-inside.svg" id="6_7w8q6"]
+[ext_resource type="Texture2D" uid="uid://clminyrnisrob" path="res://graphics/icons/arc-clockwise.svg" id="7_rl5pq"]
+[ext_resource type="Texture2D" uid="uid://cjhs2nu751okm" path="res://graphics/icons/arc-counterclockwise.svg" id="8_cbxnt"]
+[ext_resource type="Texture2D" uid="uid://cuyn5u44gx2sd" path="res://graphics/icons/add-control-node.svg" id="9_1jvfs"]
+[ext_resource type="Texture2D" uid="uid://v2dy7d56iq4y" path="res://graphics/icons/edit-control-node.svg" id="10_yvv5k"]
+[ext_resource type="Texture2D" uid="uid://dnh18uacb7w72" path="res://graphics/icons/remove-control-node.svg" id="11_kgm5p"]
+[ext_resource type="Texture2D" uid="uid://2uvl0wk3sttg" path="res://graphics/icons/arrow-left-right.svg" id="12_rqyig"]
+[ext_resource type="PackedScene" uid="uid://8xse4qb5k2er" path="res://tools/editor/EditorPathPreview.tscn" id="13_1jvfs"]
+
+[node name="EditorModule" instance=ExtResource("1_jyymo")]
+script = ExtResource("2_1jvfs")
+module_location = "left_panel"
+module_name = "Paths"
+priority = 4
+button_group_name = "paths_buttons"
+
+[node name="MarginContainer" parent="." index="0"]
+layout_mode = 1
+anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="0"]
+layout_mode = 2
+text = "Arrange in a path..."
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="1"]
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer" index="0"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer2" index="0"]
+layout_mode = 2
+text = "Inside angles"
+horizontal_alignment = 1
+
+[node name="HBoxRatioContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer2" index="1"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+script = ExtResource("3_yvv5k")
+
+[node name="HBEditorButton" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer2/HBoxRatioContainer" index="0" groups=["path_buttons"]]
+custom_minimum_size = Vector2(179, 524)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_kgm5p")
+text = "Preview"
+tooltip = "Makes a clockwise arc between the
+starting and ending notes, with
+angles pointing inwards.
+If the distance between them is too
+big, it will be set to the maximum."
+texture = ExtResource("5_8xg14")
+action = "editor_make_arc_cw_inside"
+
+[node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer2/HBoxRatioContainer" index="1" groups=["path_buttons"]]
+custom_minimum_size = Vector2(179, 572)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_kgm5p")
+text = "Counter
+clockwise"
+tooltip = "Makes a counter-clockwise arc
+between the starting and ending
+notes, with angles pointing inwards.
+If the distance between them is too
+big, it will be set to the maximum."
+texture = ExtResource("6_7w8q6")
+transform_id = 9
+action = "editor_make_arc_ccw_inside"
+
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer" index="1"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer" index="2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer" index="0"]
+layout_mode = 2
+text = "Outside angles"
+horizontal_alignment = 1
+
+[node name="HBoxRatioContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer" index="1"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+script = ExtResource("3_yvv5k")
+
+[node name="HBEditorButton" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxRatioContainer" index="0" groups=["path_buttons"]]
+custom_minimum_size = Vector2(183, 524)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_kgm5p")
+text = "Clockwise"
+tooltip = "Makes a clockwise arc between the
+starting and ending notes, with
+angles pointing outwards.
+If the distance between them is too
+big, it will be set to the maximum."
+texture = ExtResource("7_rl5pq")
+transform_id = 10
+action = "editor_make_arc_cw"
+
+[node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxRatioContainer" index="1" groups=["path_buttons"]]
+custom_minimum_size = Vector2(183, 572)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_kgm5p")
+text = "Counter
+clockwise"
+tooltip = "Makes a counter-clockwise arc
+between the starting and ending
+notes, with angles pointing outwards.
+If the distance between them is too
+big, it will be set to the maximum."
+texture = ExtResource("8_cbxnt")
+transform_id = 11
+action = "editor_make_arc_ccw"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="2"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="3"]
+layout_mode = 2
+text = "Edit path..."
+horizontal_alignment = 1
+
+[node name="HBoxRatioContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="4"]
+custom_minimum_size = Vector2(312, 0)
+layout_mode = 2
+script = ExtResource("3_yvv5k")
+
+[node name="HBEditorButton" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="0" groups=["path_buttons"]]
+custom_minimum_size = Vector2(241, 573)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_kgm5p")
+text = "Add control
+node"
+tooltip = "Adds a new control node with the given
+mode.
+Linear: Position notes in straight lines.
+Bezier: Position notes along a bezier curve.
+Continuous Bezier: A smoother bezier with
+only one control node."
+texture = ExtResource("9_1jvfs")
+transform_id = 4
+action = "editor_mirror_v"
+
+[node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="1" groups=["path_buttons"]]
+custom_minimum_size = Vector2(241, 574)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_kgm5p")
+text = "Edit control
+nodes"
+tooltip = "Mirror notes horizontally across
+the center of the screen."
+texture = ExtResource("10_yvv5k")
+transform_id = 5
+action = "editor_mirror_h"
+
+[node name="HBEditorButton3" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="2" groups=["path_buttons"]]
+custom_minimum_size = Vector2(241, 573)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_kgm5p")
+text = "Remove
+control points"
+tooltip = "Flip notes vertically across their
+center."
+texture = ExtResource("11_kgm5p")
+transform_id = 6
+action = "editor_flip_v"
+
+[node name="HBEditorButton4" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="3" groups=["path_buttons"]]
+custom_minimum_size = Vector2(241, 574)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_kgm5p")
+text = "Save
+path"
+tooltip = "Flip notes horizontally across
+their center."
+texture = ExtResource("12_rqyig")
+transform_id = 7
+action = "editor_flip_h"
+
+[node name="PathPreview" parent="." index="1" instance=ExtResource("13_1jvfs")]
+layout_mode = 1

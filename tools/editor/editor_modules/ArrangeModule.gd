@@ -102,8 +102,8 @@ func set_editor(p_editor):
 	super.set_editor(p_editor)
 	
 	arrange_menu.set_editor(p_editor)
-	editor.game_preview.add_child(arrange_menu)
-	editor.game_preview.clip_contents = true
+	
+	add_preview_tool(arrange_menu)
 
 var arranging := false
 var selected_ring := "inner"

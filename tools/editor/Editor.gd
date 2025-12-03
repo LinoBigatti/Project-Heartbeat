@@ -104,7 +104,8 @@ const EDITOR_MODULE_PATHS: Array[String] = [
 	"res://tools/editor/editor_modules/PresetsModule.tscn",
 	"res://tools/editor/editor_modules/ScriptsModule.tscn",
 	"res://tools/editor/editor_modules/SyncModule.tscn",
-	"res://tools/editor/editor_modules/TemplatesModule.tscn"
+	"res://tools/editor/editor_modules/TemplatesModule.tscn",
+	"res://tools/editor/editor_modules/PathsModule.tscn",
 ]
 
 var modules := []

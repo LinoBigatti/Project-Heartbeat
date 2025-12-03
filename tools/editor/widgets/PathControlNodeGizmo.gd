@@ -1,7 +1,7 @@
 @tool
 extends Control
 
-class_name HBEditorMovementGizmo
+class_name HBEditorPathControlNodeGizmo
 
 signal dragged(relative_movement)
 signal start_dragging()
@@ -9,14 +9,18 @@ signal finished_dragging()
 
 var hovering = false
 var dragging = false
+var disabled = false
+
 func _draw():
+	if disabled:
+		return
+	
 	var border_color = Color.YELLOW
 	if hovering:
 		border_color = Color.RED
 	border_color.a = 0.75
 	
-	draw_rect(Rect2(Vector2(0,0), size), border_color, false, 2.0)
-
+	draw_rect(Rect2(Vector2(0, 0), size), border_color, false, 2.0)
 
 func _ready():
 	connect("mouse_entered", Callable(self, "_on_mouse_entered"))
@@ -38,6 +42,9 @@ func finish_dragging():
 	hovering = false
 
 func _on_mouse_entered():
+	if disabled:
+		return
+	
 	hovering = true
 	queue_redraw()
 

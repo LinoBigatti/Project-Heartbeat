@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3 uid="uid://d0jynaki5dk12"]
+
+[ext_resource type="Script" uid="uid://blkngt0ib13s7" path="res://tools/editor/widgets/PathControlWidget.gd" id="1_5q5wc"]
+[ext_resource type="Script" uid="uid://ct8g88nxemu5a" path="res://tools/editor/widgets/PathControlNodeGizmo.gd" id="2_qvn8s"]
+[ext_resource type="Texture2D" uid="uid://d2immlhdtm6io" path="res://graphics/icons/path-control-node.svg" id="3_qvn8s"]
+
+[node name="NoteMovementWidget" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 50.0
+offset_bottom = 50.0
+script = ExtResource("1_5q5wc")
+
+[node name="ControlPointGizmo" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(20, 20)
+script = ExtResource("2_qvn8s")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_qvn8s")
+expand_mode = 1
+
+[connection signal="dragged" from="ControlPointGizmo" to="." method="_on_dragged"]
+[connection signal="finished_dragging" from="ControlPointGizmo" to="." method="_on_finish_dragging"]
+[connection signal="start_dragging" from="ControlPointGizmo" to="." method="_on_start_dragging"]
