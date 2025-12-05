@@ -278,6 +278,12 @@ var editor_code_font_size := 20
 
 var editor_templates_visibility := {"__all": true, "__uncategorized": false}
 
+var editor_spline_color := Color("ffffffff")
+var editor_disabled_spline_color := Color("80808060")
+var editor_selected_spline_color := Color("FFDE21FF")
+var editor_spline_width := 4.0
+var editor_spline_control_node_width := 3.0
+
 var oob_completed := false
 
 func _init():
@@ -313,6 +319,8 @@ func _init():
 		"editor_arrange_middle_mode", "editor_arrange_middle_subdivision", "editor_arrange_middle_snap", "editor_arrange_middle_diagonal_step", "editor_arrange_middle_vstep",
 		"editor_arrange_outer_mode", "editor_arrange_outer_subdivision", "editor_arrange_outer_snap", "editor_arrange_outer_diagonal_step", "editor_arrange_outer_vstep",
 		"editor_templates_visibility",
+		"editor_spline_color", "editor_disabled_spline_color", "editor_selected_spline_color",
+		"editor_spline_width", "editor_spline_control_node_width",
 		"pause_on_focus_loss",
 		"oob_completed"
 	]

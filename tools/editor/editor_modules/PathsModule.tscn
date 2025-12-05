@@ -197,5 +197,25 @@ texture = ExtResource("12_rqyig")
 transform_id = 7
 action = "editor_flip_h"
 
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="5"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="6"]
+layout_mode = 2
+text = "Path segments..."
+horizontal_alignment = 1
+
+[node name="PathEditTree" type="Tree" parent="MarginContainer/ScrollContainer/VBoxContainer" index="7"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+size_flags_vertical = 3
+allow_search = false
+scroll_horizontal_enabled = false
+auto_tooltip = false
+
 [node name="PathPreview" parent="." index="1" instance=ExtResource("13_1jvfs")]
 layout_mode = 1
+
+[connection signal="cell_selected" from="MarginContainer/ScrollContainer/VBoxContainer/PathEditTree" to="." method="_on_path_edit_tree_cell_selected"]
+[connection signal="nothing_selected" from="MarginContainer/ScrollContainer/VBoxContainer/PathEditTree" to="." method="_on_path_edit_tree_cell_selected"]

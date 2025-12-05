@@ -38,8 +38,9 @@ func _ready():
 	_on_resized()
 	
 func _on_resized():
-	await get_tree().process_frame
-	call_deferred("arrange_gizmo")
+	if is_inside_tree():
+		await get_tree().process_frame
+		call_deferred("arrange_gizmo")
 	
 func arrange_gizmo():
 	if note_data:

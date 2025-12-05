@@ -11,7 +11,19 @@ class HBLinearPath:
 		self.colors = PackedColorArray()
 		
 	func _draw():
-		draw_polyline_colors(self.points, self.colors, 6, true)
+		var width = UserSettings.user_settings.editor_spline_width
+		
+		if fmod(width, 2) == 0:
+			draw_polyline_colors(self.points, self.colors, UserSettings.user_settings.editor_spline_width, true)
+		else:
+			var correction := Vector2(0.5, 0.5)
+			
+			var _points := PackedVector2Array()
+			_points.resize(self.points.size())
+			for i in range(self.points.size()):
+				_points[i] = self.points[i] + correction
+			
+			draw_polyline_colors(_points, self.colors, UserSettings.user_settings.editor_spline_width, true)
 		
 	func append(point: Vector2, color: Color):
 		self.points.append(point)
@@ -25,13 +37,16 @@ class HBLinearPath:
 
 class HBPath:
 	extends HBSerializable
-
+	
+	var name: String = "Path"
+	
 	var segments: Array[HBSpline]
-
+	
 	var resolution: int = 50
-
+	
 	func _init():
 		serializable_fields += [
+			"name", 
 			"segments", 
 		]
 	
@@ -48,16 +63,18 @@ class HBPath:
 
 class HBSpline:
 	extends HBSerializable
-
+	
+	var name: String
+	
 	var start_position: Vector2
 	var end_position: Vector2
-
-	var lock_to_last_position: bool
-
+	
 	func _init():
+		self.name = "Straight Line"
+		
 		serializable_fields += [
+			"name", 
 			"start_position", "end_position", 
-			"lock_to_last_position", 
 		]
 	
 	func get_editor_widget() -> PackedScene:
@@ -69,7 +86,7 @@ class HBSpline:
 	func render_to_path(path: HBLinearPath, last_spline: HBSpline, color: Color, resolution: int):
 		var dt: float = 1.0 / resolution
 		
-		if lock_to_last_position and last_spline:
+		if last_spline:
 			self.start_position = last_spline.end_position
 			
 		for i in range(resolution):
@@ -91,6 +108,8 @@ class HBBezierSpline:
 	var control_b: Vector2
 	
 	func _init():
+		self.name = "Bezier Curve"
+		
 		serializable_fields += [
 			"control_a", "control_b", 
 		]
@@ -100,6 +119,9 @@ class HBBezierSpline:
 
 class HBContinuousBezierSpline:
 	extends HBBezierSpline
+	
+	func _init():
+		self.name = "C1 Bezier Curve"
 	
 	func render_to_path(path: HBLinearPath, last_spline: HBSpline, color: Color, resolution: int):
 		if last_spline:

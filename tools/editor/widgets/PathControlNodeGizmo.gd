@@ -7,16 +7,17 @@ signal dragged(relative_movement)
 signal start_dragging()
 signal finished_dragging()
 
-var hovering = false
-var dragging = false
-var disabled = false
+var hovering := false
+var dragging := false
+var disabled := false
+var selected := false
 
 func _draw():
-	if disabled:
+	if disabled or not selected:
 		return
 	
 	var border_color = Color.YELLOW
-	if hovering:
+	if hovering or dragging:
 		border_color = Color.RED
 	border_color.a = 0.75
 	

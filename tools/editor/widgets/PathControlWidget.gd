@@ -14,24 +14,31 @@ var internal_pos : Vector2
 var starting_pos
 var drag_origin: Vector2
 
-var spline: HBPaths.HBSpline: set = set_spline
+var spline: HBPaths.HBSpline : set = set_spline
 
 var control_property := "start_position"
 
 var connected_widget: HBEditorWidget = null
+var line_color: Color : set = set_line_color
 
 func _ready():
 	super._ready()
 	
-	modulate = Color("ffffff")
-	
 	get_viewport().connect("size_changed", Callable(self, "_on_resized"))
 	_on_resized()
+	deselect()
 
 func set_spline(val):
 	spline = val
 	
 	arrange_gizmo()
+
+func set_line_color(val):
+	line_color = val
+	
+	texture_rect.modulate = line_color
+	
+	queue_redraw()
 
 func connect_to_widget(widget: HBEditorWidget):
 	self.connected_widget = widget
@@ -47,14 +54,27 @@ func arrange_gizmo():
 		texture_rect.size = movement_gizmo.size
 		internal_pos = position
 
+func select():
+	movement_gizmo.selected = true
+	
+	movement_gizmo.queue_redraw()
+	queue_redraw()
+
 func disable():
-	modulate = Color("808080")
+	line_color = UserSettings.user_settings.editor_disabled_spline_color
 	
 	movement_gizmo.disabled = true
 
+func deselect():
+	movement_gizmo.selected = false
+	
+	movement_gizmo.queue_redraw()
+	queue_redraw()
+
 func _on_resized():
-	await get_tree().process_frame
-	call_deferred("arrange_gizmo")
+	if is_inside_tree():
+		await get_tree().process_frame
+		call_deferred("arrange_gizmo")
 
 func _on_dragged(movement: Vector2):
 	if not spline:
@@ -84,11 +104,37 @@ func _widget_area_input(event: InputEvent):
 
 func _draw():
 	if connected_widget:
-		draw_line(size / 2, connected_widget.global_position - global_position + connected_widget.size / 2, Color("ffffffff"), 4)
+		var width = UserSettings.user_settings.editor_spline_control_node_width
+		
+		if fmod(width, 2) == 0:
+			draw_line(size / 2, connected_widget.global_position - global_position + connected_widget.size / 2, line_color, width)
+		else:
+			var correction := Vector2(0.5, 0.5)
+			draw_line(size / 2 + correction, (connected_widget.global_position - global_position) + connected_widget.size / 2 + correction, line_color, width)
 
 func _on_start_dragging():
 	drag_origin = position
 	internal_pos = position
+	
+	select()
+	
+	var paths_module = spline.get_meta("paths_module", null)
+	if paths_module:
+		paths_module.path_preview.selected_widget = self
+		
+		var control_node_item = get_tree_item()
+		if control_node_item:
+			paths_module.path_edit_tree.set_selected(control_node_item, 0)
+			paths_module.path_edit_tree.queue_redraw()
+
+func get_tree_item() -> TreeItem:
+	var control_node_item = spline.get_meta(control_property, null)
+	if control_node_item:
+		control_node_item.set_meta("widget", self)
+		
+		return control_node_item
+	
+	return null
 
 func _on_finish_dragging():
 	var snapped_pos = editor.snap_position_to_grid(
@@ -109,7 +155,6 @@ func _on_finish_dragging():
 	undo_redo.add_undo_method(_update_preview)
 	
 	undo_redo.commit_action()
-	pass
 
 func _update_preview():
 	update_preview.emit()
