@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bj3f8gk8edyqb"]
+[gd_scene load_steps=21 format=3 uid="uid://bj3f8gk8edyqb"]
 
 [ext_resource type="PackedScene" uid="uid://pr5h8mdaei60" path="res://tools/editor/EditorModule.tscn" id="1_jyymo"]
 [ext_resource type="Script" uid="uid://djsjnsfgxav06" path="res://tools/editor/editor_modules/PathsModule.gd" id="2_1jvfs"]
@@ -13,13 +13,20 @@
 [ext_resource type="Texture2D" uid="uid://dnh18uacb7w72" path="res://graphics/icons/remove-control-node.svg" id="11_kgm5p"]
 [ext_resource type="Texture2D" uid="uid://2uvl0wk3sttg" path="res://graphics/icons/arrow-left-right.svg" id="12_rqyig"]
 [ext_resource type="PackedScene" uid="uid://8xse4qb5k2er" path="res://tools/editor/EditorPathPreview.tscn" id="13_1jvfs"]
+[ext_resource type="Script" uid="uid://dnivdq2vtlnwl" path="res://tools/editor/controls/HBEditorChoiceButtonGroup.gd" id="13_cbxnt"]
+[ext_resource type="Texture2D" uid="uid://dacgy328maj15" path="res://graphics/icons/spline-regular-bezier.svg" id="13_yvv5k"]
+[ext_resource type="Texture2D" uid="uid://bdikcnwqfjwse" path="res://graphics/icons/spline-straight.svg" id="14_i83to"]
+[ext_resource type="Texture2D" uid="uid://x6s05j47c0ky" path="res://graphics/icons/spline-smooth-bezier.svg" id="15_i83to"]
+[ext_resource type="Texture2D" uid="uid://dvwf4bjpk7rnx" path="res://graphics/icons/spline-cardinal.svg" id="16_kopdj"]
+[ext_resource type="Texture2D" uid="uid://bjk3ryw8kroy" path="res://graphics/icons/spline-circle.svg" id="17_ver1p"]
+[ext_resource type="Texture2D" uid="uid://cdwojg4ku3sh8" path="res://graphics/icons/spline-periodic.svg" id="18_rqyig"]
 
 [node name="EditorModule" instance=ExtResource("1_jyymo")]
 script = ExtResource("2_1jvfs")
 module_location = "left_panel"
 module_name = "Paths"
 priority = 4
-button_group_name = "paths_buttons"
+button_group_name = "path_buttons"
 
 [node name="MarginContainer" parent="." index="0"]
 layout_mode = 1
@@ -51,7 +58,7 @@ layout_mode = 2
 script = ExtResource("3_yvv5k")
 
 [node name="HBEditorButton" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer2/HBoxRatioContainer" index="0" groups=["path_buttons"]]
-custom_minimum_size = Vector2(179, 524)
+custom_minimum_size = Vector2(179, 202)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -62,10 +69,11 @@ angles pointing inwards.
 If the distance between them is too
 big, it will be set to the maximum."
 texture = ExtResource("5_8xg14")
+button_mode = "function"
 action = "editor_make_arc_cw_inside"
 
 [node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer2/HBoxRatioContainer" index="1" groups=["path_buttons"]]
-custom_minimum_size = Vector2(179, 572)
+custom_minimum_size = Vector2(179, 278)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -77,7 +85,7 @@ notes, with angles pointing inwards.
 If the distance between them is too
 big, it will be set to the maximum."
 texture = ExtResource("6_7w8q6")
-transform_id = 9
+button_mode = "function"
 action = "editor_make_arc_ccw_inside"
 
 [node name="VSeparator" type="VSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer" index="1"]
@@ -98,7 +106,7 @@ layout_mode = 2
 script = ExtResource("3_yvv5k")
 
 [node name="HBEditorButton" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxRatioContainer" index="0" groups=["path_buttons"]]
-custom_minimum_size = Vector2(183, 524)
+custom_minimum_size = Vector2(183, 235)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -109,11 +117,11 @@ angles pointing outwards.
 If the distance between them is too
 big, it will be set to the maximum."
 texture = ExtResource("7_rl5pq")
-transform_id = 10
+button_mode = "function"
 action = "editor_make_arc_cw"
 
 [node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxRatioContainer" index="1" groups=["path_buttons"]]
-custom_minimum_size = Vector2(183, 572)
+custom_minimum_size = Vector2(183, 278)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -125,7 +133,7 @@ notes, with angles pointing outwards.
 If the distance between them is too
 big, it will be set to the maximum."
 texture = ExtResource("8_cbxnt")
-transform_id = 11
+button_mode = "function"
 action = "editor_make_arc_ccw"
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="2"]
@@ -142,7 +150,7 @@ layout_mode = 2
 script = ExtResource("3_yvv5k")
 
 [node name="HBEditorButton" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="0" groups=["path_buttons"]]
-custom_minimum_size = Vector2(241, 573)
+custom_minimum_size = Vector2(241, 302)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -155,11 +163,12 @@ Bezier: Position notes along a bezier curve.
 Continuous Bezier: A smoother bezier with
 only one control node."
 texture = ExtResource("9_1jvfs")
-transform_id = 4
+button_mode = "function"
+function_name = "add_segment"
 action = "editor_mirror_v"
 
 [node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="1" groups=["path_buttons"]]
-custom_minimum_size = Vector2(241, 574)
+custom_minimum_size = Vector2(241, 300)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -168,11 +177,12 @@ nodes"
 tooltip = "Mirror notes horizontally across
 the center of the screen."
 texture = ExtResource("10_yvv5k")
+button_mode = "function"
 transform_id = 5
 action = "editor_mirror_h"
 
 [node name="HBEditorButton3" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="2" groups=["path_buttons"]]
-custom_minimum_size = Vector2(241, 573)
+custom_minimum_size = Vector2(241, 340)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -181,11 +191,12 @@ control points"
 tooltip = "Flip notes vertically across their
 center."
 texture = ExtResource("11_kgm5p")
+button_mode = "function"
 transform_id = 6
 action = "editor_flip_v"
 
 [node name="HBEditorButton4" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="3" groups=["path_buttons"]]
-custom_minimum_size = Vector2(241, 574)
+custom_minimum_size = Vector2(241, 196)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -194,22 +205,107 @@ path"
 tooltip = "Flip notes horizontally across
 their center."
 texture = ExtResource("12_rqyig")
+button_mode = "function"
 transform_id = 7
 action = "editor_flip_h"
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="5"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="5"]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="6"]
+[node name="PathTypeControlGroup" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 6
+script = ExtResource("13_cbxnt")
+selected_idx = 3
+
+[node name="Button" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="0"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("14_i83to")
+flat = true
+icon_alignment = 1
+
+[node name="Button2" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="1"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("13_yvv5k")
+flat = true
+icon_alignment = 1
+
+[node name="Button3" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="2"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("15_i83to")
+flat = true
+icon_alignment = 1
+
+[node name="Button4" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="3"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("16_kopdj")
+flat = true
+icon_alignment = 1
+
+[node name="Button5" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="4"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("17_ver1p")
+flat = true
+icon_alignment = 1
+
+[node name="Button6" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="5"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("18_rqyig")
+flat = true
+icon_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2" index="1"]
+layout_mode = 2
+
+[node name="LockDistanceControlGroup" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2" index="2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 6
+script = ExtResource("13_cbxnt")
+
+[node name="Button" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/LockDistanceControlGroup" index="0"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("13_yvv5k")
+flat = true
+icon_alignment = 1
+
+[node name="Button2" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/LockDistanceControlGroup" index="1"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("13_yvv5k")
+flat = true
+icon_alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="6"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="7"]
 layout_mode = 2
 text = "Path segments..."
 horizontal_alignment = 1
 
-[node name="PathEditTree" type="Tree" parent="MarginContainer/ScrollContainer/VBoxContainer" index="7"]
+[node name="PathEditTree" type="Tree" parent="MarginContainer/ScrollContainer/VBoxContainer" index="8"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 size_flags_vertical = 3
+columns = 3
 allow_search = false
 scroll_horizontal_enabled = false
 auto_tooltip = false

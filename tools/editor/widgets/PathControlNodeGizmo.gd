@@ -9,7 +9,7 @@ signal finished_dragging()
 
 var hovering := false
 var dragging := false
-var disabled := false
+var disabled := false : set = set_disabled
 var selected := false
 
 func _draw():
@@ -52,3 +52,11 @@ func _on_mouse_entered():
 func _on_mouse_exited():
 	hovering = false
 	queue_redraw()
+
+func set_disabled(value: bool):
+	disabled = value
+	
+	if disabled:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+	else:
+		mouse_filter = Control.MOUSE_FILTER_STOP
