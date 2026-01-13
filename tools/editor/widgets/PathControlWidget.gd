@@ -181,8 +181,12 @@ func _on_finish_dragging():
 	var undo_redo = editor.undo_redo
 	undo_redo.create_action("Move Path control point")
 	
-	undo_redo.add_do_property(spline, control_property, snapped_pos)
-	undo_redo.add_undo_property(spline, control_property, editor.rhythm_game.inv_map_coords(drag_origin + size/2))
+	if spline is HBPaths.HBPeriodicSpline and control_property == "amplitude":
+		undo_redo.add_do_method(Callable(spline.set_amplitude).bind(snapped_pos))
+		undo_redo.add_undo_method(Callable(spline.set_amplitude).bind(editor.rhythm_game.inv_map_coords(drag_origin + size/2)))
+	else:
+		undo_redo.add_do_property(spline, control_property, snapped_pos)
+		undo_redo.add_undo_property(spline, control_property, editor.rhythm_game.inv_map_coords(drag_origin + size/2))
 	
 	for widget in self.connected_widgets:
 		undo_redo.add_do_property(widget.spline, widget.control_property, editor.rhythm_game.inv_map_coords(widget.position + size/2))

@@ -1,5 +1,14 @@
 class_name HBPaths
 
+enum PATH_ID {
+	LINEAR = 0,
+	BEZIER,
+	C2_BEZIER,
+	CARDINAL_SPLINE,
+	CIRCLE_SEGMENT,
+	PERIODIC_FN,
+}
+
 class HBLinearPath:
 	extends Control
 	
@@ -69,12 +78,16 @@ class HBPath:
 class HBSpline:
 	extends HBSerializable
 	
+	var id: PATH_ID
+	
 	var name: String
 	
 	var start_position: Vector2
 	var end_position: Vector2
 	
 	func _init():
+		self.id = PATH_ID.LINEAR
+		
 		self.name = "Straight Line" 
 		
 		self.start_position = Vector2.ZERO
@@ -101,7 +114,7 @@ class HBSpline:
 			var t := i * dt
 			path.append(self.interpolate(t), color, t)
 		
-		path.append(self.interpolate(1.0), color, 1.0)
+		path.append(self.end_position, color, 1.0)
 	
 	func to_linear(last_spline: HBSpline, next_spline: HBSpline, color: Color, resolution: int) -> HBLinearPath:
 		var path := HBLinearPath.new()
@@ -142,6 +155,8 @@ class HBBezierSpline:
 	
 	func _init():
 		super()
+		
+		self.id = PATH_ID.BEZIER
 		
 		self.name = "Bezier Curve"
 		
@@ -211,17 +226,21 @@ class HBContinuousBezierSpline:
 	func _init():
 		super()
 		
+		self.id = PATH_ID.C2_BEZIER
+		
 		self.name = "C1 Bezier Curve"
 	
 	func update_control_a(last_spline: HBSpline):
 		if last_spline:
-			self.control_a = self.start_position + (self.start_position - last_spline.control_b)
+			if last_spline is HBBezierSpline:
+				self.control_a = self.start_position + (self.start_position - last_spline.control_b)
+			elif last_spline.id == PATH_ID.LINEAR:
+				self.control_a = self.start_position
 	
 	func render_to_path(path: HBLinearPath, last_spline: HBSpline, next_spline: HBSpline, color: Color, resolution: int):
 		update_control_a(last_spline)
 		
 		super(path, last_spline, next_spline, color, resolution)
-
 
 class HBCardinalSpline:
 	extends HBContinuousBezierSpline
@@ -230,6 +249,8 @@ class HBCardinalSpline:
 	
 	func _init():
 		super()
+		
+		self.id = PATH_ID.CARDINAL_SPLINE
 		
 		self.name = "Cardinal Spline"
 		
@@ -268,27 +289,51 @@ class HBCardinalSpline:
 class HBCircularSpline:
 	extends HBSpline
 	
-	var angle: float = 180.0
-	var clockwise: bool = true
+	var angle: float
+	var clockwise: bool
 	
 	func _init():
 		super()
 		
+		self.id = PATH_ID.CIRCLE_SEGMENT
+		
 		self.name = "Circular Segment"
+		
+		self.angle = 180.0
+		self.clockwise = true
 		
 		serializable_fields += [
 			"angle", "clockwise", 
 		]
 	
 	func interpolate(t: float) -> Vector2:
-		var center := (self.start_position + self.end_position) / 2
-		var radius := self.start_position.distance_to(center)
+		# Get the angles from each point to the circle center
+		var complementary_angle := deg_to_rad((180.0 - self.angle) / 2)
 		
-		var start_angle := self.angle if self.clockwise else 0.0
-		var end_angle := 0.0 if self.clockwise else self.angle
+		# Construct the circle center with some basic trigonometry
+		var horizontal_vector_to_center := (self.end_position - self.start_position) / 2
+		var radius := horizontal_vector_to_center.length() / cos(complementary_angle)
+		
+		var line_center := self.start_position + horizontal_vector_to_center
+		var horizontal_direction_to_center := horizontal_vector_to_center.normalized()
+		
+		var vertical_distance_to_center := radius * sin(complementary_angle)
+		var vertical_vector_to_center := horizontal_direction_to_center.rotated(PI / 2) * vertical_distance_to_center
+		if not self.clockwise:
+			vertical_vector_to_center *= -1
+		
+		var circle_center := line_center + vertical_vector_to_center
+		
+		var start_angle := fposmod(circle_center.angle_to_point(self.start_position), 2 * PI)
+		
+		# Make sure the circle has the correct direction
+		var end_angle := start_angle + deg_to_rad(self.angle)
+		if not self.clockwise:
+			end_angle = start_angle - deg_to_rad(self.angle)
+		
 		var theta := lerpf(start_angle, end_angle, t)
 		
-		return center + Vector2(cos(theta), sin(theta)) * radius
+		return circle_center + Vector2(cos(theta), sin(theta)) * radius
 	
 	func split_at(point: Vector2, t_value: float) -> Array[HBSpline]:
 		var new_spline_a := HBCircularSpline.new()
@@ -301,8 +346,8 @@ class HBCircularSpline:
 		var end_angle := 0.0 if self.clockwise else self.angle
 		var theta := lerpf(start_angle, end_angle, t_value)
 		
-		new_spline_a.angle = theta
-		new_spline_b.angle = self.angle - theta
+		new_spline_a.angle = self.angle - theta
+		new_spline_b.angle = theta
 		
 		new_spline_a.start_position = self.start_position
 		new_spline_a.end_position = point
@@ -315,41 +360,83 @@ class HBCircularSpline:
 class HBPeriodicSpline:
 	extends HBSpline
 	
-	var angle: float = 180.0
-	var clockwise: bool = true
+	enum FUNC_TYPE {
+		SINE,
+		SAW,
+		TRIANGLE,
+		SQUARE,
+	}
+	
+	var function_type: FUNC_TYPE
+	var peak_count: int
+	var amplitude: float
 	
 	func _init():
 		super()
 		
-		self.name = "Circular Segment"
+		self.id = PATH_ID.PERIODIC_FN
+		
+		self.name = "Periodic Function"
+		
+		self.function_type = FUNC_TYPE.TRIANGLE
+		self.amplitude = 200.0
+		self.peak_count = 3
 		
 		serializable_fields += [
-			"angle", "clockwise", 
+			"function_type", "control_point", 
 		]
 	
 	func interpolate(t: float) -> Vector2:
 		var center := (self.start_position + self.end_position) / 2
 		var radius := self.start_position.distance_to(center)
 		
-		var start_angle := self.angle if self.clockwise else 0.0
-		var end_angle := 0.0 if self.clockwise else self.angle
+		var horizontal_pos := self.start_position.lerp(self.end_position, t)
+		var vertical_vector := Vector2(1, 0).rotated(self.start_position.angle_to_point(self.end_position) - PI / 2)
+		
+		var start_angle := 0.0
+		var end_angle := 2 * PI * self.peak_count
 		var theta := lerpf(start_angle, end_angle, t)
 		
-		return center + Vector2(cos(theta), sin(theta)) * radius
+		var function_value := 0.0
+		match self.function_type:
+			FUNC_TYPE.SINE:
+				function_value = sin(theta)
+			FUNC_TYPE.SAW:
+				# Saw wave with a period of 2PI
+				var period := 2 * PI
+				
+				function_value = 2 * ((theta / period) - floor(0.5 + theta / period)) as float
+			FUNC_TYPE.TRIANGLE:
+				# Triangle wave with a period of 2PI
+				# We need to offset the wave by PI/2 because this equation
+				# creates a wave with the same phase as a cosine function.
+				var period := 2 * PI
+				theta += PI / 2
+				
+				function_value = 2 * abs(2 * ((theta / period) - floor(0.5 + theta / period))) - 1 as float
+			FUNC_TYPE.SQUARE:
+				# Define square wave using the sign of a sine wave
+				function_value = sign(sin(theta))
+			_:
+				pass
+		
+		return horizontal_pos + vertical_vector * function_value * amplitude
 	
 	func split_at(point: Vector2, t_value: float) -> Array[HBSpline]:
-		var new_spline_a := HBCircularSpline.new()
-		var new_spline_b := HBCircularSpline.new()
+		# There is no real lossless way to split these splines, so we just
+		# copy the parameters without any extra processing.
 		
-		new_spline_a.clockwise = self.clockwise
-		new_spline_b.clockwise = self.clockwise
+		var new_spline_a := HBPeriodicSpline.new()
+		var new_spline_b := HBPeriodicSpline.new()
 		
-		var start_angle := self.angle if self.clockwise else 0.0
-		var end_angle := 0.0 if self.clockwise else self.angle
-		var theta := lerpf(start_angle, end_angle, t_value)
+		new_spline_a.function_type = self.function_type
+		new_spline_b.function_type = self.function_type
 		
-		new_spline_a.angle = theta
-		new_spline_b.angle = self.angle - theta
+		new_spline_a.amplitude = self.amplitude
+		new_spline_b.amplitude = self.amplitude
+		
+		new_spline_a.peak_count = self.peak_count
+		new_spline_b.peak_count = self.peak_count
 		
 		new_spline_a.start_position = self.start_position
 		new_spline_a.end_position = point
@@ -358,3 +445,21 @@ class HBPeriodicSpline:
 		new_spline_b.end_position = self.end_position
 		
 		return [new_spline_a, new_spline_b]
+	
+	func get_control_point() -> Vector2:
+		var t := 1.0 / (self.peak_count * 4)
+		if self.function_type == FUNC_TYPE.SAW:
+			t = 1.0 / (self.peak_count * 2)
+		
+		return interpolate(t)
+	
+	func set_amplitude(control_point: Vector2) -> void:
+		var straight_line := self.end_position - self.start_position
+		var to_control_point := control_point - self.start_position
+		
+		var angle := straight_line.angle_to(to_control_point)
+		var distance_to_line = sin(angle) * to_control_point.length()
+		if not self.function_type == FUNC_TYPE.SAW:
+			distance_to_line *= -1
+		
+		self.amplitude = distance_to_line

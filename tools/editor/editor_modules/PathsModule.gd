@@ -11,6 +11,19 @@ const EDITOR_PATHS_PATH := "user://editor_paths"
 
 @onready var path_type_control_group = get_node("%PathTypeControlGroup")
 @onready var lock_distance_control_group = get_node("%LockDistanceControlGroup")
+@onready var segment_name_line_edit: HBEditorLineEdit = get_node("%SegmentNameLineEdit")
+
+@onready var cardinal_controls = get_node("%CardinalControlsVBoxContainer")
+@onready var circle_controls = get_node("%CircleControlsVBoxContainer")
+@onready var function_controls = get_node("%FunctionControlsVBoxContainer")
+
+@onready var cardinal_smoothness_slider = get_node("%CardinalSmoothnessHSlider")
+
+@onready var circle_direction_option_button = get_node("%CircleDirectionOptionButton")
+@onready var circle_angle_slider = get_node("%CircleAngleHSlider")
+
+@onready var function_type_option_button = get_node("%FunctionTypeOptionButton")
+@onready var peak_count_slider = get_node("%PeakCountHSlider")
 
 var paths := {}
 var open_path: HBEditorPath = HBEditorPath.new()
@@ -98,6 +111,30 @@ func _input(event: InputEvent):
 	
 	pass
 
+func get_new_segment_object():
+	var spline_types := [
+		HBPaths.HBSpline.new(),
+		HBPaths.HBBezierSpline.new(),
+		HBPaths.HBContinuousBezierSpline.new(),
+		HBPaths.HBCardinalSpline.new(),
+		HBPaths.HBCircularSpline.new(),
+		HBPaths.HBPeriodicSpline.new(),
+	]
+	
+	var spline = spline_types[UserSettings.user_settings.editor_last_spline_type]
+	
+	if spline is HBPaths.HBCardinalSpline:
+		spline.curve_smoothness = UserSettings.user_settings.editor_last_cardinal_smoothness
+	
+	if spline is HBPaths.HBCircularSpline:
+		spline.angle = UserSettings.user_settings.editor_last_circle_segment_angle
+		spline.clockwise = UserSettings.user_settings.editor_circle_segment_clockwise
+	
+	if spline is HBPaths.HBPeriodicSpline:
+		spline.function_type = UserSettings.user_settings.editor_last_periodic_fn_type
+	
+	return spline
+
 func _toggle_path_preview():
 	if path_preview.visible:
 		path_preview.clear_preview()
@@ -107,15 +144,77 @@ func _toggle_path_preview():
 		path_preview.set_path(self.selected_path, self.selected_segment, self.open_path.paths)
 		path_preview.rebuild_widgets()
 		path_preview.show()
+	
+	update_parameters()
 
 func update_preview():
 	path_preview.clear_widgets()
 	
 	rebuild_tree()
+	update_parameters()
 	
 	path_preview.update_preview()
 	path_preview.rebuild_widgets()
 
+func update_parameters():
+	update_segment_name()
+	
+	var spline_type = UserSettings.user_settings.editor_last_spline_type
+	if self.selected_segment:
+		spline_type = self.selected_segment.id
+	
+	if spline_type == HBPaths.PATH_ID.CARDINAL_SPLINE:
+		cardinal_controls.show()
+		
+		if self.selected_segment:
+			cardinal_smoothness_slider.set_value_no_signal(self.selected_segment.curve_smoothness)
+		else:
+			cardinal_smoothness_slider.set_value_no_signal(UserSettings.user_settings.editor_last_cardinal_smoothness)
+	else:
+		cardinal_controls.hide()
+	
+	if spline_type == HBPaths.PATH_ID.CIRCLE_SEGMENT:
+		circle_controls.show()
+		
+		if self.selected_segment:
+			circle_direction_option_button.selected = 0 if self.selected_segment.clockwise else 1
+			
+			circle_angle_slider.set_value_no_signal(self.selected_segment.angle)
+		else:
+			circle_direction_option_button.selected = 0 if UserSettings.user_settings.editor_circle_segment_clockwise else 1
+			
+			circle_angle_slider.set_value_no_signal(UserSettings.user_settings.editor_last_circle_segment_angle)
+	else:
+		circle_controls.hide()
+	
+	if spline_type == HBPaths.PATH_ID.PERIODIC_FN:
+		function_controls.show()
+		
+		if self.selected_segment:
+			function_type_option_button.selected = self.selected_segment.function_type
+			
+			peak_count_slider.set_value_no_signal(self.selected_segment.peak_count)
+		else:
+			function_type_option_button.selected = UserSettings.user_settings.editor_last_periodic_fn_type
+			
+			peak_count_slider.set_value_no_signal(UserSettings.user_settings.editor_last_periodic_fn_peak_count)
+	else:
+		function_controls.hide()
+
+func update_segment_name():
+	segment_name_line_edit.editable = true
+	
+	if self.selected_segment:
+		segment_name_line_edit.text = self.selected_segment.name
+	else:
+		if path_preview.new_segment and path_preview.adding_segment:
+			segment_name_line_edit.text = path_preview.new_segment.name
+		else:
+			segment_name_line_edit.editable = false
+			
+			var new_segment = get_new_segment_object()
+			segment_name_line_edit.text = new_segment.name
+	
 func rebuild_tree():
 	path_edit_tree.clear()
 	
@@ -187,6 +286,8 @@ func _on_path_edit_tree_cell_selected() -> void:
 	
 	if selected_item.has_meta("segment"):
 		selected_segment = selected_item.get_meta("segment")
+		
+		path_type_control_group.select(selected_segment.id)
 	
 	path_preview.set_path(self.selected_path, self.selected_segment, self.open_path.paths)
 	
@@ -198,36 +299,38 @@ func _on_path_edit_tree_cell_selected() -> void:
 			widget.select()
 	
 	path_preview.update_widgets()
+	
+	update_parameters()
 
 func _on_path_type_selected(idx: int):
 	UserSettings.user_settings.editor_last_spline_type = idx
+	UserSettings.save_user_settings()
+	
+	update_parameters()
 
 func _on_lock_distance_selected(idx: int):
 	var lock_spline_distance := true if idx == 0 else false
+	
 	UserSettings.user_settings.editor_lock_spline_distance = lock_spline_distance
+	UserSettings.save_user_settings()
 
 func add_segment():
 	self.selected_segment = null
 	path_preview.selected_segment = null
 	
-	var spline_types := [
-		HBPaths.HBSpline.new(),
-		HBPaths.HBBezierSpline.new(),
-		HBPaths.HBContinuousBezierSpline.new(),
-		HBPaths.HBCardinalSpline.new(),
-		HBPaths.HBCircularSpline.new(),
-		HBPaths.HBPeriodicSpline.new(),
-	]
-	
-	var new_segment = spline_types[UserSettings.user_settings.editor_last_spline_type]
+	var new_segment = get_new_segment_object()
 	new_segment.set_meta("adding", true)
 	path_preview.new_segment = new_segment
 	path_preview.adding_segment = true
+	
+	path_type_control_group.select(new_segment.id)
 	
 	path_preview.update_split_widget()
 	
 	path_preview.update_preview()
 	path_preview.rebuild_widgets()
+	
+	update_parameters()
 
 func _on_create_spline(spline):
 	var new_segment_idx := self.selected_path.segments.size()
@@ -249,7 +352,7 @@ func _on_create_spline(spline):
 	
 	undo_redo.commit_action()
 
-func _on_split_spline(spline: HBPaths.HBBezierSpline, point: Vector2, t_value: float):
+func _on_split_spline(spline: HBPaths.HBSpline, point: Vector2, t_value: float):
 	var new_segment_idx = self.selected_path.segments.find(spline)
 	var selected_path_idx = self.open_path.paths.find(selected_path)
 	
@@ -276,3 +379,107 @@ func _on_split_spline(spline: HBPaths.HBBezierSpline, point: Vector2, t_value: f
 	undo_redo.add_undo_method(Callable(call_deferred).bind("update_preview"))
 	
 	undo_redo.commit_action()
+
+func _on_segment_name_changed() -> void:
+	if self.selected_segment:
+		undo_redo.create_action("Rename spline.")
+		
+		undo_redo.add_do_property(self.selected_segment, "name", segment_name_line_edit.text)
+		undo_redo.add_undo_property(self.selected_segment, "name", self.selected_segment.name)
+		
+		undo_redo.commit_action()
+	elif path_preview.new_segment:
+		path_preview.new_segment.name = segment_name_line_edit.text
+
+func _on_cardinal_smoothness_changed(value: float) -> void:
+	value = clamp(value, 0.0, 1.0)
+	
+	if self.selected_segment and self.selected_segment is HBPaths.HBCardinalSpline:
+		undo_redo.create_action("Edit cardinal spline's smoothness.")
+		
+		undo_redo.add_do_property(self.selected_segment, "curve_smoothness", value)
+		undo_redo.add_undo_property(self.selected_segment, "curve_smoothness", self.selected_segment.curve_smoothness)
+		
+		undo_redo.commit_action()
+	else:
+		UserSettings.user_settings.editor_last_cardinal_smoothness = value
+		UserSettings.save_user_settings()
+		
+		if path_preview.new_segment and path_preview.new_segment is HBPaths.HBCardinalSpline:
+			path_preview.new_segment.curve_smoothness = value
+	
+	update_preview()
+
+func _on_circle_angle_changed(value: float) -> void:
+	value = clamp(value, 0.0, 360.0)
+	
+	if self.selected_segment and self.selected_segment is HBPaths.HBCircularSpline:
+		undo_redo.create_action("Edit circle segment's angle.")
+		
+		undo_redo.add_do_property(self.selected_segment, "angle", value)
+		undo_redo.add_undo_property(self.selected_segment, "angle", self.selected_segment.angle)
+		
+		undo_redo.commit_action()
+	else:
+		UserSettings.user_settings.editor_last_circle_segment_angle = value
+		UserSettings.save_user_settings()
+		
+		if path_preview.new_segment and path_preview.new_segment is HBPaths.HBCircularSpline:
+			path_preview.new_segment.angle = value
+	
+	update_preview()
+
+func _on_circle_direction_selected(idx: int):
+	var circle_direction := true if idx == 0 else false
+	
+	if self.selected_segment and self.selected_segment is HBPaths.HBCircularSpline:
+		undo_redo.create_action("Edit circle segment's direction.")
+		
+		undo_redo.add_do_property(self.selected_segment, "clockwise", circle_direction)
+		undo_redo.add_undo_property(self.selected_segment, "clockwise", self.selected_segment.clockwise)
+		
+		undo_redo.commit_action()
+	else:
+		UserSettings.user_settings.editor_circle_segment_clockwise = circle_direction
+		UserSettings.save_user_settings()
+		
+		if path_preview.new_segment and path_preview.new_segment is HBPaths.HBCircularSpline:
+			path_preview.new_segment.clockwise = circle_direction
+	
+	update_preview()
+
+func _on_function_type_selected(idx: int):
+	if self.selected_segment and self.selected_segment is HBPaths.HBPeriodicSpline:
+		undo_redo.create_action("Edit periodic function's type.")
+		
+		undo_redo.add_do_property(self.selected_segment, "function_type", idx)
+		undo_redo.add_undo_property(self.selected_segment, "function_type", self.selected_segment.function_type)
+		
+		undo_redo.commit_action()
+	else:
+		UserSettings.user_settings.editor_last_periodic_fn_type = idx
+		UserSettings.save_user_settings()
+		
+		if path_preview.new_segment and path_preview.new_segment is HBPaths.HBPeriodicSpline:
+			path_preview.new_segment.function_type = idx
+	
+	update_preview()
+
+func _on_peak_count_changed(value: float) -> void:
+	value = int(clamp(value, 1.0, 31.0))
+	
+	if self.selected_segment and self.selected_segment is HBPaths.HBPeriodicSpline:
+		undo_redo.create_action("Edit periodic function's peak count.")
+		
+		undo_redo.add_do_property(self.selected_segment, "peak_count", value)
+		undo_redo.add_undo_property(self.selected_segment, "peak_count", self.selected_segment.peak_count)
+		
+		undo_redo.commit_action()
+	else:
+		UserSettings.user_settings.editor_last_periodic_fn_peak_count = value
+		UserSettings.save_user_settings()
+		
+		if path_preview.new_segment and path_preview.new_segment is HBPaths.HBPeriodicSpline:
+			path_preview.new_segment.peak_count = value
+	
+	update_preview()

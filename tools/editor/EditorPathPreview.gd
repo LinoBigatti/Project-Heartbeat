@@ -121,7 +121,29 @@ func set_path(_selected_path: HBPaths.HBPath, _segment: HBPaths.HBSpline, _paths
 	
 	queue_redraw()
 
-func add_control_point_widget(spline: HBPaths.HBSpline, control_property: StringName) -> HBEditorWidget:
+func add_control_property_widget(spline: HBPaths.HBSpline, control_property: StringName) -> HBEditorWidget:
+	var set_fn := func (pos): spline.set(control_property, pos)
+	var get_fn := Callable(spline.get).bind(control_property)
+	
+	var widget_instance = add_control_point_widget(spline, set_fn, get_fn)
+	widget_instance.control_property = control_property
+	
+	# Refresh widget's tree item
+	if spline.has_meta(control_property):
+		var control_node_item = spline.get_meta(control_property, null)
+		if control_node_item:
+			control_node_item.set_meta("widget", widget_instance)
+	
+	if spline.get_meta("adding", false):
+		if control_property == "end_position":
+			widget_instance.created.connect(_create_new_segment)
+		
+		widget_instance.set_meta("creating", true)
+		new_segment_widgets.append(widget_instance)
+	
+	return widget_instance
+
+func add_control_point_widget(spline: HBPaths.HBSpline, set_fn: Callable, get_fn: Callable) -> HBEditorWidget:
 	var widget: PackedScene = spline.get_editor_widget()
 	
 	if widget:
@@ -130,29 +152,15 @@ func add_control_point_widget(spline: HBPaths.HBSpline, control_property: String
 		
 		paths_module.add_preview_widget(widget_instance)
 		
-		var position: Vector2 = spline.get(control_property)
-		vwidget_instance.position = editor.rhythm_game.remap_coords(position) - widget_instance.size / 2
+		var position: Vector2 = get_fn.call()
+		widget_instance.position = editor.rhythm_game.remap_coords(position) - widget_instance.size / 2
 		
 		widget_instance.movement_gizmo.connect("dragged", _on_gizmo_dragged)
 		widget_instance.set_spline(spline)
-		widget_instance.control_property = control_property
 		
 		widget_instance.connect("update_preview", _on_update_preview)
-		widget_instance.connect("position_changed", func (pos): spline.set(control_property, pos))
-		widget_instance.set_meta("refresh_fn", func (): return editor.rhythm_game.remap_coords(spline.get(control_property)))
-		
-		# Refresh widget's tree item
-		if spline.has_meta(control_property):
-			var control_node_item = spline.get_meta(control_property, null)
-			if control_node_item:
-				control_node_item.set_meta("widget", widget_instance)
-		
-		if spline.get_meta("adding", false):
-			if control_property == "end_position":
-				widget_instance.created.connect(_create_new_segment)
-			
-			widget_instance.set_meta("creating", true)
-			new_segment_widgets.append(widget_instance)
+		widget_instance.connect("position_changed", set_fn)
+		widget_instance.set_meta("refresh_fn", func (): return editor.rhythm_game.remap_coords(get_fn.call()))
 		
 		control_widgets.append(widget_instance)
 		
@@ -244,20 +252,20 @@ func rebuild_widgets():
 		
 		var start_widget = null
 		if not last_segment:
-			start_widget = add_control_point_widget(segment, "start_position")
+			start_widget = add_control_property_widget(segment, "start_position")
 			start_widget.line_color = color
 		
-		var end_widget = add_control_point_widget(segment, "end_position")
+		var end_widget = add_control_property_widget(segment, "end_position")
 		end_widget.line_color = color
 		if segment.has_meta("adding") and segment.get_meta("adding", false):
 			end_widget.line_color = UserSettings.user_settings.editor_selected_spline_color
 		
 		if segment is HBPaths.HBBezierSpline:
-			var control_b = add_control_point_widget(segment, "control_b")
+			var control_b = add_control_property_widget(segment, "control_b")
 			control_b.line_color = color
 			control_b.connect_to_widget(end_widget)
 			
-			var control_a = add_control_point_widget(segment, "control_a")
+			var control_a = add_control_property_widget(segment, "control_a")
 			control_a.line_color = color
 			
 			if last_widget:
@@ -285,6 +293,11 @@ func rebuild_widgets():
 					return editor.rhythm_game.remap_coords(segment.get("control_b"))
 				
 				control_b.set_meta("refresh_fn", refresh_fn)
+		
+		if segment is HBPaths.HBPeriodicSpline:
+			var amplitude_widget = add_control_point_widget(segment, segment.set_amplitude, segment.get_control_point)
+			amplitude_widget.control_property = "amplitude"
+			amplitude_widget.line_color = color
 		
 		last_widget = end_widget
 
