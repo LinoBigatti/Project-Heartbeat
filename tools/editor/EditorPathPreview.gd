@@ -149,6 +149,7 @@ func add_control_point_widget(spline: HBPaths.HBSpline, set_fn: Callable, get_fn
 	if widget:
 		var widget_instance = widget.instantiate() as HBEditorPathControlWidget
 		widget_instance.editor = self.editor
+		widget_instance.paths_preview = self
 		
 		paths_module.add_preview_widget(widget_instance)
 		
@@ -274,7 +275,7 @@ func rebuild_widgets():
 				if start_widget:
 					control_a.connect_to_widget(start_widget)
 			
-			if segment is HBPaths.HBContinuousBezierSpline:
+			if segment is HBPaths.HBContinuousBezierSpline and last_segment:
 				control_a.disable()
 				
 				var refresh_fn = func():
@@ -298,6 +299,11 @@ func rebuild_widgets():
 			var amplitude_widget = add_control_point_widget(segment, segment.set_amplitude, segment.get_control_point)
 			amplitude_widget.control_property = "amplitude"
 			amplitude_widget.line_color = color
+			
+			if segment.has_meta("amplitude"):
+				var control_node_item = segment.get_meta("amplitude", null)
+				if control_node_item:
+					control_node_item.set_meta("widget", amplitude_widget)
 		
 		last_widget = end_widget
 
@@ -325,7 +331,7 @@ func update_preview():
 			if i < path.segments.size() - 1:
 				next_segment = path.segments[i + 1]
 			else:
-				if show_new_segment:
+				if show_new_segment and self.selected_path == path:
 					next_segment = self.new_segment
 			
 			var color = UserSettings.user_settings.editor_disabled_spline_color

@@ -27,6 +27,8 @@ func _on_pressed(button: Button):
 	update_selection()
 	
 	choice_selected.emit(self.selected_idx)
+	
+	button.release_focus()
 
 func select(idx: int):
 	var children := get_children()
@@ -41,10 +43,10 @@ func select(idx: int):
 	
 	update_selection()
 
-
 func update_selection():
 	for child in get_children():
-		if child is Button and child == selected:
-			child.flat = false
-		else:
-			child.flat = true
+		if child is Button:
+			if child == selected:
+				child.flat = false
+			else:
+				child.flat = true

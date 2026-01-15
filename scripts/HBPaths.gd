@@ -146,6 +146,30 @@ class HBSpline:
 		new_spline_b.end_position = self.end_position
 		
 		return [new_spline_a, new_spline_b]
+	
+	func approximate_control_a() -> Vector2:
+		var dt := 0.01
+		
+		var pos_a := self.start_position
+		var pos_b := interpolate(dt)
+		
+		var derivative_2d := (pos_b - pos_a) / dt
+		var length = clamp(derivative_2d.length(), 0.0, 512.0)
+		derivative_2d = derivative_2d.normalized() * length
+		
+		return self.start_position + derivative_2d * 0.5
+	
+	func approximate_control_b() -> Vector2:
+		var dt := 0.01
+		
+		var pos_a := interpolate(1.0 - dt)
+		var pos_b := self.end_position
+		
+		var derivative_2d := (pos_b - pos_a) / dt
+		var length = clamp(derivative_2d.length(), 0.0, 512.0)
+		derivative_2d = derivative_2d.normalized() * length
+		
+		return self.end_position - derivative_2d * 0.5
 
 class HBBezierSpline:
 	extends HBSpline
@@ -219,6 +243,12 @@ class HBBezierSpline:
 		new_spline_b.end_position = self.end_position
 		
 		return [new_spline_a, new_spline_b]
+	
+	func approximate_control_a() -> Vector2:
+		return self.control_a
+	
+	func approximate_control_b() -> Vector2:
+		return self.control_b
 
 class HBContinuousBezierSpline:
 	extends HBBezierSpline
@@ -232,10 +262,7 @@ class HBContinuousBezierSpline:
 	
 	func update_control_a(last_spline: HBSpline):
 		if last_spline:
-			if last_spline is HBBezierSpline:
-				self.control_a = self.start_position + (self.start_position - last_spline.control_b)
-			elif last_spline.id == PATH_ID.LINEAR:
-				self.control_a = self.start_position
+			self.control_a = self.start_position + (self.start_position - last_spline.approximate_control_b())
 	
 	func render_to_path(path: HBLinearPath, last_spline: HBSpline, next_spline: HBSpline, color: Color, resolution: int):
 		update_control_a(last_spline)
@@ -260,7 +287,12 @@ class HBCardinalSpline:
 	
 	func update_control_a(last_spline: HBSpline):
 		if last_spline:
-			var control_point := ((self.end_position - last_spline.start_position) * self.curve_smoothness) / 3.0 as Vector2
+			var control_point: Vector2
+			
+			if last_spline is HBCardinalSpline:
+				control_point = ((self.end_position - last_spline.start_position) * self.curve_smoothness) / 3.0 as Vector2
+			else:
+				control_point = self.start_position - last_spline.approximate_control_b()
 			
 			self.control_a = self.start_position + control_point
 		else:
@@ -271,7 +303,12 @@ class HBCardinalSpline:
 	
 	func update_control_b(next_spline: HBSpline):
 		if next_spline:
-			var control_point := ((next_spline.end_position - self.start_position) * self.curve_smoothness) / 3.0 as Vector2
+			var control_point: Vector2
+			
+			if next_spline is HBCardinalSpline:
+				control_point = ((next_spline.end_position - self.start_position) * self.curve_smoothness) / 3.0
+			else:
+				control_point = (self.end_position - next_spline.approximate_control_a()) * -1
 			
 			self.control_b = self.end_position - control_point
 		else:
@@ -405,7 +442,7 @@ class HBPeriodicSpline:
 				# Saw wave with a period of 2PI
 				var period := 2 * PI
 				
-				function_value = 2 * ((theta / period) - floor(0.5 + theta / period)) as float
+				function_value = -2 * ((theta / period) - floor(0.5 + theta / period)) as float
 			FUNC_TYPE.TRIANGLE:
 				# Triangle wave with a period of 2PI
 				# We need to offset the wave by PI/2 because this equation
@@ -458,8 +495,6 @@ class HBPeriodicSpline:
 		var to_control_point := control_point - self.start_position
 		
 		var angle := straight_line.angle_to(to_control_point)
-		var distance_to_line = sin(angle) * to_control_point.length()
-		if not self.function_type == FUNC_TYPE.SAW:
-			distance_to_line *= -1
+		var distance_to_line = -sin(angle) * to_control_point.length()
 		
 		self.amplitude = distance_to_line

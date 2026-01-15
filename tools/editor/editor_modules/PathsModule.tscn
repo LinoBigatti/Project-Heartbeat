@@ -36,11 +36,13 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="0"]
+visible = false
 layout_mode = 2
 text = "Arrange in a path..."
 horizontal_alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="1"]
+visible = false
 layout_mode = 2
 alignment = 1
 
@@ -59,7 +61,7 @@ layout_mode = 2
 script = ExtResource("3_yvv5k")
 
 [node name="HBEditorButton" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer2/HBoxRatioContainer" index="0" groups=["path_buttons"]]
-custom_minimum_size = Vector2(179, 524)
+custom_minimum_size = Vector2(179, 231)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -74,7 +76,7 @@ button_mode = "function"
 action = "editor_make_arc_cw_inside"
 
 [node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer2/HBoxRatioContainer" index="1" groups=["path_buttons"]]
-custom_minimum_size = Vector2(179, 572)
+custom_minimum_size = Vector2(179, 278)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -107,7 +109,7 @@ layout_mode = 2
 script = ExtResource("3_yvv5k")
 
 [node name="HBEditorButton" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxRatioContainer" index="0" groups=["path_buttons"]]
-custom_minimum_size = Vector2(183, 524)
+custom_minimum_size = Vector2(183, 235)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -122,7 +124,7 @@ button_mode = "function"
 action = "editor_make_arc_cw"
 
 [node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxRatioContainer" index="1" groups=["path_buttons"]]
-custom_minimum_size = Vector2(183, 572)
+custom_minimum_size = Vector2(183, 282)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
@@ -138,6 +140,7 @@ button_mode = "function"
 action = "editor_make_arc_ccw"
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="2"]
+visible = false
 layout_mode = 2
 
 [node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="3"]
@@ -157,15 +160,23 @@ size_flags_horizontal = 3
 script = ExtResource("4_kgm5p")
 text = "Add control
 node"
-tooltip = "Adds a new control node with the given
-mode.
+tooltip = "Adds a new control node with the given mode.
 Linear: Position notes in straight lines.
 Bezier: Position notes along a bezier curve.
 Continuous Bezier: A smoother bezier with
-only one control node."
+only one control node.
+Cardinal Spline: An interpolating spline which
+passess through the given points. Can be 
+sharper or more curved depending on the
+smoothness parameter.
+Circle Segment: An arc  between two points
+along a circle with a given direction and angle.
+Periodic Function: A collection of periodic
+waves with an amplitude control node and
+a frequency setting."
 texture = ExtResource("9_1jvfs")
 button_mode = "function"
-function_name = "add_segment"
+function_name = "_start_creating_segment"
 action = "editor_mirror_v"
 
 [node name="HBEditorButton2" type="Container" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxRatioContainer" index="1" groups=["path_buttons"]]
@@ -210,17 +221,40 @@ button_mode = "function"
 transform_id = 7
 action = "editor_flip_h"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="5"]
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="5"]
 layout_mode = 2
 
-[node name="PathTypeControlGroup" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2" index="0"]
+[node name="SplineControls" type="PanelContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="6"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls" index="0"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer" index="0"]
+layout_mode = 2
+
+[node name="SelectedSplineLabel" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer" index="0"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Selected spline..."
+horizontal_alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer" index="1"]
+layout_mode = 2
+
+[node name="PathTypeControlGroup" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2" index="0"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 6
 script = ExtResource("13_cbxnt")
 selected_idx = 3
 
-[node name="Button" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="0"]
+[node name="Button" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="0"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -228,7 +262,7 @@ icon = ExtResource("14_i83to")
 flat = true
 icon_alignment = 1
 
-[node name="Button2" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="1"]
+[node name="Button2" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="1"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -236,7 +270,7 @@ icon = ExtResource("13_yvv5k")
 flat = true
 icon_alignment = 1
 
-[node name="Button3" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="2"]
+[node name="Button3" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="2"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -244,7 +278,7 @@ icon = ExtResource("15_i83to")
 flat = true
 icon_alignment = 1
 
-[node name="Button4" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="3"]
+[node name="Button4" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="3"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -252,7 +286,7 @@ icon = ExtResource("16_kopdj")
 flat = true
 icon_alignment = 1
 
-[node name="Button5" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="4"]
+[node name="Button5" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="4"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -260,7 +294,7 @@ icon = ExtResource("17_ver1p")
 flat = true
 icon_alignment = 1
 
-[node name="Button6" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="5"]
+[node name="Button6" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2/PathTypeControlGroup" index="5"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -268,16 +302,16 @@ icon = ExtResource("18_rqyig")
 flat = true
 icon_alignment = 1
 
-[node name="VSeparator" type="VSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2" index="1"]
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2" index="1"]
 layout_mode = 2
 
-[node name="LockDistanceControlGroup" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2" index="2"]
+[node name="LockDistanceControlGroup" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2" index="2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 6
 script = ExtResource("13_cbxnt")
 
-[node name="Button" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/LockDistanceControlGroup" index="0"]
+[node name="Button" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2/LockDistanceControlGroup" index="0"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -285,7 +319,7 @@ icon = ExtResource("13_yvv5k")
 flat = true
 icon_alignment = 1
 
-[node name="Button2" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/HBoxContainer2/LockDistanceControlGroup" index="1"]
+[node name="Button2" type="Button" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/HBoxContainer2/LockDistanceControlGroup" index="1"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -293,7 +327,7 @@ icon = ExtResource("13_yvv5k")
 flat = true
 icon_alignment = 1
 
-[node name="SegmentNameLineEdit" type="LineEdit" parent="MarginContainer/ScrollContainer/VBoxContainer" index="6"]
+[node name="SegmentNameLineEdit" type="LineEdit" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer" index="2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
@@ -301,19 +335,19 @@ placeholder_text = "Segment Name..."
 script = ExtResource("20_kopdj")
 metadata/_custom_type_script = "uid://buyyl1h56yijv"
 
-[node name="CardinalControlsVBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="7"]
+[node name="CardinalControlsVBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer" index="3"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/CardinalControlsVBoxContainer" index="0"]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CardinalControlsVBoxContainer" index="0"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CardinalControlsVBoxContainer" index="1"]
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CardinalControlsVBoxContainer" index="1"]
 layout_mode = 2
 text = "Smoothness"
 horizontal_alignment = 1
 
-[node name="CardinalSmoothnessHSlider" type="HSlider" parent="MarginContainer/ScrollContainer/VBoxContainer/CardinalControlsVBoxContainer" index="2"]
+[node name="CardinalSmoothnessHSlider" type="HSlider" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CardinalControlsVBoxContainer" index="2"]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 1.0
@@ -322,37 +356,38 @@ value = 0.5
 tick_count = 3
 ticks_on_borders = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/CardinalControlsVBoxContainer" index="3"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CardinalControlsVBoxContainer" index="3"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CardinalControlsVBoxContainer/HBoxContainer" index="0"]
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CardinalControlsVBoxContainer/HBoxContainer" index="0"]
 layout_mode = 2
 size_flags_horizontal = 2
 text = "Tense"
 
-[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CardinalControlsVBoxContainer/HBoxContainer" index="1"]
+[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CardinalControlsVBoxContainer/HBoxContainer" index="1"]
 layout_mode = 2
 size_flags_horizontal = 6
 text = "Relaxed"
 
-[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CardinalControlsVBoxContainer/HBoxContainer" index="2"]
+[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CardinalControlsVBoxContainer/HBoxContainer" index="2"]
 layout_mode = 2
 size_flags_horizontal = 10
-text = "Smooth"
+text = "Curved"
 
-[node name="CircleControlsVBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="8"]
+[node name="CircleControlsVBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer" index="4"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer" index="0"]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer" index="0"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer" index="1"]
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer" index="1"]
 layout_mode = 2
 text = "Direction"
 horizontal_alignment = 1
 
-[node name="CircleDirectionOptionButton" type="OptionButton" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer" index="2"]
+[node name="CircleDirectionOptionButton" type="OptionButton" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer" index="2"]
 unique_name_in_owner = true
 layout_mode = 2
 item_count = 2
@@ -361,12 +396,12 @@ popup/item_0/id = 0
 popup/item_1/text = "Counterclockwise"
 popup/item_1/id = 1
 
-[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer" index="3"]
+[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer" index="3"]
 layout_mode = 2
-text = "Circular Angle"
+text = "Circle Angle"
 horizontal_alignment = 1
 
-[node name="CircleAngleHSlider" type="HSlider" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer" index="4"]
+[node name="CircleAngleHSlider" type="HSlider" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer" index="4"]
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 1.0
@@ -375,37 +410,38 @@ value = 1.0
 tick_count = 9
 ticks_on_borders = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer" index="5"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer" index="5"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer/HBoxContainer" index="0"]
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer/HBoxContainer" index="0"]
 layout_mode = 2
 size_flags_horizontal = 2
 text = "0º"
 
-[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer/HBoxContainer" index="1"]
+[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer/HBoxContainer" index="1"]
 layout_mode = 2
 size_flags_horizontal = 6
 text = "180º"
 
-[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer/HBoxContainer" index="2"]
+[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer/HBoxContainer" index="2"]
 layout_mode = 2
 size_flags_horizontal = 10
 text = "360º"
 
-[node name="FunctionControlsVBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer" index="9"]
+[node name="FunctionControlsVBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer" index="5"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer" index="0"]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer" index="0"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer" index="1"]
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer" index="1"]
 layout_mode = 2
 text = "Function Type"
 horizontal_alignment = 1
 
-[node name="FunctionTypeOptionButton" type="OptionButton" parent="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer" index="2"]
+[node name="FunctionTypeOptionButton" type="OptionButton" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer" index="2"]
 unique_name_in_owner = true
 layout_mode = 2
 selected = 0
@@ -419,42 +455,42 @@ popup/item_2/id = 2
 popup/item_3/text = "Square Wave"
 popup/item_3/id = 3
 
-[node name="PeakCountHSlider" type="HSlider" parent="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer" index="3"]
+[node name="PeakCountHSlider" type="HSlider" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer" index="3"]
 unique_name_in_owner = true
 layout_mode = 2
 min_value = 1.0
 max_value = 31.0
 value = 1.0
-tick_count = 9
+tick_count = 11
 ticks_on_borders = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer" index="4"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer" index="4"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer/HBoxContainer" index="0"]
+[node name="Label" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer/HBoxContainer" index="0"]
 layout_mode = 2
 size_flags_horizontal = 2
 text = "1 peak"
 
-[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer/HBoxContainer" index="1"]
+[node name="Label2" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer/HBoxContainer" index="1"]
 layout_mode = 2
 size_flags_horizontal = 6
 text = "16 peaks"
 
-[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer/HBoxContainer" index="2"]
+[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer/HBoxContainer" index="2"]
 layout_mode = 2
 size_flags_horizontal = 10
 text = "31 peaks"
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="10"]
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/ScrollContainer/VBoxContainer" index="7"]
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="11"]
+[node name="Label3" type="Label" parent="MarginContainer/ScrollContainer/VBoxContainer" index="8"]
 layout_mode = 2
 text = "Path segments..."
 horizontal_alignment = 1
 
-[node name="PathEditTree" type="Tree" parent="MarginContainer/ScrollContainer/VBoxContainer" index="12"]
+[node name="PathEditTree" type="Tree" parent="MarginContainer/ScrollContainer/VBoxContainer" index="9"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
@@ -467,11 +503,11 @@ auto_tooltip = false
 [node name="PathPreview" parent="." index="1" instance=ExtResource("13_1jvfs")]
 layout_mode = 1
 
-[connection signal="text_changed" from="MarginContainer/ScrollContainer/VBoxContainer/SegmentNameLineEdit" to="." method="_on_segment_name_changed"]
-[connection signal="value_changed" from="MarginContainer/ScrollContainer/VBoxContainer/CardinalControlsVBoxContainer/CardinalSmoothnessHSlider" to="." method="_on_cardinal_smoothness_changed"]
-[connection signal="item_selected" from="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer/CircleDirectionOptionButton" to="." method="_on_circle_direction_selected"]
-[connection signal="value_changed" from="MarginContainer/ScrollContainer/VBoxContainer/CircleControlsVBoxContainer/CircleAngleHSlider" to="." method="_on_circle_angle_changed"]
-[connection signal="item_selected" from="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer/FunctionTypeOptionButton" to="." method="_on_function_type_selected"]
-[connection signal="value_changed" from="MarginContainer/ScrollContainer/VBoxContainer/FunctionControlsVBoxContainer/PeakCountHSlider" to="." method="_on_peak_count_changed"]
+[connection signal="text_changed" from="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/SegmentNameLineEdit" to="." method="_on_segment_name_changed"]
+[connection signal="value_changed" from="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CardinalControlsVBoxContainer/CardinalSmoothnessHSlider" to="." method="_on_cardinal_smoothness_changed"]
+[connection signal="item_selected" from="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer/CircleDirectionOptionButton" to="." method="_on_circle_direction_selected"]
+[connection signal="value_changed" from="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/CircleControlsVBoxContainer/CircleAngleHSlider" to="." method="_on_circle_angle_changed"]
+[connection signal="item_selected" from="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer/FunctionTypeOptionButton" to="." method="_on_function_type_selected"]
+[connection signal="value_changed" from="MarginContainer/ScrollContainer/VBoxContainer/SplineControls/MarginContainer/VBoxContainer/FunctionControlsVBoxContainer/PeakCountHSlider" to="." method="_on_peak_count_changed"]
 [connection signal="cell_selected" from="MarginContainer/ScrollContainer/VBoxContainer/PathEditTree" to="." method="_on_path_edit_tree_cell_selected"]
 [connection signal="nothing_selected" from="MarginContainer/ScrollContainer/VBoxContainer/PathEditTree" to="." method="_on_path_edit_tree_cell_selected"]

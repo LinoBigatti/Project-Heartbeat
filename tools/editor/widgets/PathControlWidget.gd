@@ -23,6 +23,8 @@ var connected_widget: HBEditorWidget = null
 var connected_widgets: Array[HBEditorWidget] = []
 var line_color: Color : set = set_line_color
 
+var paths_preview
+
 func _ready():
 	super._ready()
 	
@@ -92,17 +94,20 @@ func _on_resized():
 		call_deferred("arrange_gizmo")
 
 func _on_dragged(movement: Vector2):
-	if not spline or get_meta("creating", false):
+	if not spline or (get_meta("creating", false) and control_property == "end_position"):
 		return
 	
 	internal_pos += movement
 	
 	var original_position = position + size / 2
-	var snapped_pos = editor.snap_position_to_grid(
-		editor.rhythm_game.inv_map_coords(internal_pos + size / 2),
-		editor.rhythm_game.inv_map_coords(drag_origin + size / 2),
-		Input.is_key_pressed(KEY_SHIFT)
-	)
+	
+	var snapped_pos = editor.rhythm_game.inv_map_coords(internal_pos + size / 2)
+	if control_property in ["start_position", "end_position"]:
+		snapped_pos = editor.snap_position_to_grid(
+			editor.rhythm_game.inv_map_coords(internal_pos + size / 2),
+			editor.rhythm_game.inv_map_coords(drag_origin + size / 2),
+			Input.is_key_pressed(KEY_SHIFT),
+		)
 	
 	position = editor.rhythm_game.remap_coords(snapped_pos) - size / 2
 	
@@ -130,8 +135,7 @@ func _widget_area_input(event: InputEvent):
 			Input.is_key_pressed(KEY_SHIFT)
 		)
 		
-		var new_pos = editor.rhythm_game.remap_coords(snapped_pos) - size / 2
-		position = new_pos
+		position = editor.rhythm_game.remap_coords(snapped_pos) - size / 2
 		
 		position_changed.emit(snapped_pos)
 		position_changed_delta.emit(position - original_position)
@@ -170,23 +174,28 @@ func _on_start_dragging():
 				paths_module.path_edit_tree.queue_redraw()
 
 func _on_finish_dragging():
-	var snapped_pos = editor.snap_position_to_grid(
-		editor.rhythm_game.inv_map_coords(internal_pos + size/2),
-		editor.rhythm_game.inv_map_coords(drag_origin + size/2),
-		Input.is_key_pressed(KEY_SHIFT)
-	)
+	var original_pos = editor.rhythm_game.inv_map_coords(drag_origin + size/2)
+	var snapped_pos = editor.rhythm_game.inv_map_coords(internal_pos + size / 2)
+	if control_property in ["start_position", "end_position"]:
+		snapped_pos = editor.snap_position_to_grid(
+			editor.rhythm_game.inv_map_coords(internal_pos + size / 2),
+			editor.rhythm_game.inv_map_coords(drag_origin + size / 2),
+			Input.is_key_pressed(KEY_SHIFT),
+		)
 	
+	var original_position = position
 	position = editor.rhythm_game.remap_coords(snapped_pos) - size / 2
+	position_changed_delta.emit(position - original_position)
 	
-	var undo_redo = editor.undo_redo
-	undo_redo.create_action("Move Path control point")
+	var undo_redo = editor.undo_redo as UndoRedo
+	undo_redo.create_action("Move %s control point" % spline.name)
 	
 	if spline is HBPaths.HBPeriodicSpline and control_property == "amplitude":
 		undo_redo.add_do_method(Callable(spline.set_amplitude).bind(snapped_pos))
-		undo_redo.add_undo_method(Callable(spline.set_amplitude).bind(editor.rhythm_game.inv_map_coords(drag_origin + size/2)))
+		undo_redo.add_undo_method(Callable(spline.set_amplitude).bind(original_pos))
 	else:
 		undo_redo.add_do_property(spline, control_property, snapped_pos)
-		undo_redo.add_undo_property(spline, control_property, editor.rhythm_game.inv_map_coords(drag_origin + size/2))
+		undo_redo.add_undo_property(spline, control_property, original_pos)
 	
 	for widget in self.connected_widgets:
 		undo_redo.add_do_property(widget.spline, widget.control_property, editor.rhythm_game.inv_map_coords(widget.position + size/2))
@@ -196,13 +205,11 @@ func _on_finish_dragging():
 			undo_redo.add_do_method(Callable(spline.update_control_node).bind(widget.spline))
 			undo_redo.add_undo_method(Callable(spline.update_control_node).bind(widget.spline))
 	
-	undo_redo.add_do_method(_update_preview)
-	undo_redo.add_undo_method(_update_preview)
+	if self.paths_preview:
+		undo_redo.add_do_method(paths_preview._on_update_preview)
+		undo_redo.add_undo_method(paths_preview._on_update_preview)
 	
 	undo_redo.commit_action()
-
-func _update_preview():
-	update_preview.emit()
 
 func get_tree_item() -> TreeItem:
 	if spline.has_meta(control_property):
