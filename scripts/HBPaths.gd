@@ -9,6 +9,12 @@ enum PATH_ID {
 	PERIODIC_FN,
 }
 
+enum PLACEMENT_STYLE {
+	LOCKED_DISTANCE = 0,
+	INTERPOLATED,
+	PLACE_AT_POINT,
+}
+
 class HBLinearPath:
 	extends Control
 	
@@ -59,6 +65,31 @@ class HBLinearPath:
 	func remap_coords(f: Callable):
 		for i in range(self.points.size()):
 			self.points[i] = f.call(self.points[i])
+	
+	func get_length():
+		var total_length := 0.0
+		
+		if self.points:
+			var last_point := self.points.get(0)
+			for point in self.points:
+				total_length += last_point.distance_to(point)
+		
+		return total_length
+	
+	func get_distance_map():
+		var distance_map := {}
+		
+		if self.points:
+			var last_point := self.points.get(0)
+			for i in range(self.points.size()):
+				var point := self.points.get(i)
+				var t := self.t_values.get(i)
+				
+				distance_map[t] = last_point.distance_to(point)
+				
+				last_point = point
+		
+		return distance_map
 
 class HBPath:
 	extends HBSerializable
@@ -74,6 +105,12 @@ class HBPath:
 			"name", 
 			"segments", 
 		]
+	
+	func get_timeline_item():
+		var timeline_item_scene = load("res://tools/editor/timeline_items/EditorTimelineItemSpline.tscn")
+		var timeline_item = timeline_item_scene.instantiate()
+		timeline_item.data = self
+		return timeline_item
 
 class HBSpline:
 	extends HBSerializable
@@ -85,6 +122,9 @@ class HBSpline:
 	var start_position: Vector2
 	var end_position: Vector2
 	
+	var placement_style: PLACEMENT_STYLE
+	var duration_ms: int
+	
 	func _init():
 		self.id = PATH_ID.LINEAR
 		
@@ -93,8 +133,12 @@ class HBSpline:
 		self.start_position = Vector2.ZERO
 		self.end_position = Vector2(128, 64)
 		
+		self.duration_ms = 1200
+		self.placement_style = PLACEMENT_STYLE.LOCKED_DISTANCE
+		
 		serializable_fields += [
 			"name", 
+			"time", "end_time",
 			"start_position", "end_position", 
 		]
 	
@@ -170,6 +214,14 @@ class HBSpline:
 		derivative_2d = derivative_2d.normalized() * length
 		
 		return self.end_position - derivative_2d * 0.5
+	
+	func get_duration() -> int:
+		if self.placement_style == PLACEMENT_STYLE.LOCKED_DISTANCE:
+			pass
+		
+		var duration := self.duration_ms
+		
+		return duration
 
 class HBBezierSpline:
 	extends HBSpline

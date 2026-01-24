@@ -16,6 +16,7 @@ signal disable_ui
 signal disable_extended_ui
 
 const EDITOR_LAYER_SCENE = preload("res://tools/editor/EditorLayer.tscn")
+const EDITOR_SPLINES_LAYER_SCENE = preload("res://tools/editor/EditorSplinesLayer.tscn")
 const EDITOR_TIMELINE_ITEM_SCENE = preload("res://tools/editor/timeline_items/EditorTimelineItemSingleNote.tscn")
 const EDITOR_MODULES_DIR = "res://tools/editor/editor_modules"
 
@@ -576,6 +577,9 @@ func get_timing_points() -> Array:
 	
 	var layers = timeline.get_layers()
 	for layer in layers:
+		if layer.name == "Paths":
+			continue
+		
 		points += layer.get_timing_points()
 	
 	points.sort_custom(Callable(self, "_note_comparison"))
@@ -1428,7 +1432,7 @@ func get_chart():
 	chart.editor_settings = song_editor_settings
 	var layers = []
 	for layer in layer_items:
-		if layer.layer_name in ["Lyrics", "Sections", "Tempo Map"]:
+		if layer.layer_name in ["Lyrics", "Sections", "Tempo Map", "Paths"]:
 			continue
 		layers.append({
 			"name": layer.layer_name,
@@ -1500,7 +1504,14 @@ func from_chart(chart: HBChart, ignore_settings = false, importing = false, in_p
 	if not ignore_settings:
 		await load_settings(chart.editor_settings)
 	
-	# Create note layers first to ensure they go at the top
+	# Create paths layers first so that it stays at the top when it is active
+	var spline_layer_scene = EDITOR_SPLINES_LAYER_SCENE.instantiate()
+	spline_layer_scene.layer_name = "Paths"
+	
+	timeline.add_layer(spline_layer_scene)
+	timeline.change_layer_visibility(false, spline_layer_scene.layer_name)
+	
+	# Create note layers after the paths layer to ensure they go at the top
 	if not in_place:
 		for layer in chart.layers:
 			var layer_scene

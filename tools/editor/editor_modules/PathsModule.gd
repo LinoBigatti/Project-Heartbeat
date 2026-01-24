@@ -2,6 +2,8 @@ extends HBEditorModule
 
 const EDITOR_PATHS_PATH := "user://editor_paths"
 
+const SPLINE_ARRANGE_RESOLUTION := 2000.0
+
 @onready var load_icon = preload("res://tools/icons/icon_load.svg")
 @onready var copy_icon = preload("res://tools/icons/icon_action_copy.svg")
 @onready var delete_icon = preload("res://tools/icons/icon_remove.svg")
@@ -145,6 +147,8 @@ func select_spline(spline: HBPaths.HBSpline) -> void:
 	self.selected_segment = spline
 	
 	path_preview.set_path(self.selected_path, self.selected_segment, self.open_path.paths)
+	
+	update_timeline_preview()
 
 func _toggle_path_preview():
 	if path_preview.visible:
@@ -166,6 +170,36 @@ func update_preview():
 	
 	path_preview.update_preview()
 	path_preview.rebuild_widgets()
+
+func update_timeline_preview():
+	var spline_layer: EditorLayer = null
+	for layer in editor.timeline.get_layers():
+		if layer.layer_name == "Paths":
+			spline_layer = layer
+			break
+	
+	var selected := get_selected()
+	var start_time = get_playhead_position()
+	if selected:
+		start_time = selected[0].data.time
+	
+	if spline_layer:
+		if self.selected_path:
+			editor.timeline.change_layer_visibility(true, spline_layer.layer_name)
+			
+			spline_layer.clear_items()
+			
+			var item = self.selected_path.get_timeline_item()
+			
+			item.editor = editor
+			item.call_deferred("set_path", self.selected_path)
+			item.set_start(start_time)
+			
+			spline_layer.add_child(item)
+		else:
+			editor.timeline.change_layer_visibility(false, spline_layer.layer_name)
+			
+			spline_layer.clear_items()
 
 func update_parameters():
 	update_segment_name()

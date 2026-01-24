@@ -1,0 +1,38 @@
+[gd_scene load_steps=4 format=3 uid="uid://cmq5sp4pgs80x"]
+
+[ext_resource type="Script" uid="uid://c4s0sbk0udyox" path="res://tools/editor/timeline_items/EditorTimelineItemSpline.gd" id="1_ktsnn"]
+[ext_resource type="Script" uid="uid://3muy1gjp7ev4" path="res://tools/editor/timeline_items/sustain_end_line_HACK.gd" id="2_01xm6"]
+[ext_resource type="Texture2D" uid="uid://d2immlhdtm6io" path="res://graphics/icons/path-control-node.svg" id="2_ktsnn"]
+
+[node name="EditorTimelineItem" type="Control"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 166.0
+offset_bottom = 35.0
+script = ExtResource("1_ktsnn")
+
+[node name="TextureRect2" type="TextureRect" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 0
+texture = ExtResource("2_ktsnn")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Control" type="Control" parent="TextureRect2"]
+show_behind_parent = true
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("2_01xm6")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("2_ktsnn")
+expand_mode = 1
+stretch_mode = 6

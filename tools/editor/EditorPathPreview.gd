@@ -49,11 +49,12 @@ func _process(delta):
 	set_process(false)
 
 func _on_resized():
-	await get_tree().process_frame
-	update_widgets()
-	call_deferred("update_preview")
-	
-	set_process(true)
+	if get_tree():
+		await get_tree().process_frame
+		update_widgets()
+		call_deferred("update_preview")
+		
+		set_process(true)
 
 func _on_gizmo_dragged(_delta):
 	_on_resized()

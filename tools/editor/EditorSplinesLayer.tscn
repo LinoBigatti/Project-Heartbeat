@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://dex3hfd7c16vl"]
+
+[ext_resource type="Script" uid="uid://jbvbx72hfhnx" path="res://tools/editor/EditorSplinesLayer.gd" id="1_lxan4"]
+[ext_resource type="PackedScene" uid="uid://3yxayegc4i16" path="res://tools/editor/EditorTimelinePreview.tscn" id="2_12boh"]
+
+[sub_resource type="StyleBoxFlat" id="1"]
+resource_local_to_scene = true
+bg_color = Color(0.145098, 0.168627, 0.219608, 1)
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.25098)
+
+[node name="EditorLayer" type="Panel"]
+custom_minimum_size = Vector2(50, 35)
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 25.0
+mouse_filter = 1
+theme_override_styles/panel = SubResource("1")
+script = ExtResource("1_lxan4")
+
+[node name="EditorTimelinePreview" parent="." instance=ExtResource("2_12boh")]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 0
+offset_bottom = 25.0
+mouse_filter = 2
+
+[connection signal="mouse_exited" from="." to="." method="_on_EditorLayer_mouse_exited"]
