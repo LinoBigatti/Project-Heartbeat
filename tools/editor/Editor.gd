@@ -996,6 +996,8 @@ func paste(time: int):
 		undo_redo.create_action("Paste timing points")
 		message_shower._show_notification("Paste notes")
 		
+		var note_cache := cache_notes_at_time()
+		
 		var min_point = copied_points[0].item.data as HBTimingPoint
 		for copy in copied_points:
 			var timing_point := copy.item.data as HBTimingPoint
@@ -1020,7 +1022,7 @@ func paste(time: int):
 				timing_point.end_time = timing_point.time + copy.item.data.get_duration()
 			
 			if timing_point is HBBaseNote and UserSettings.user_settings.editor_auto_place:
-				timing_point = autoplace(timing_point)
+				timing_point = autoplace(timing_point, false, [], note_cache)
 			
 			var new_item = timing_point.get_timeline_item() as EditorTimelineItem
 			
@@ -1044,7 +1046,9 @@ func paste(time: int):
 		undo_redo.add_do_method(self.sort_groups)
 		
 		undo_redo.commit_action()
-		check_for_multi_changes(multi_check_times)
+		
+		var item_cache := cache_items_at_time()
+		check_for_multi_changes(multi_check_times, item_cache)
 
 func delete_selected():
 	if selected.size() > 0:
@@ -2271,11 +2275,13 @@ func autoplace(data: HBBaseNote, force: bool = false, selected_data: Array = [],
 		time_as_eight = fmod(15.0 - abs(time_as_eight), 15.0)
 	
 	var notes_at_time := []
-	if data.time in times_cache:
-		notes_at_time = times_cache[data.time]
+	if times_cache:
+		if data.time in times_cache:
+			notes_at_time = times_cache[data.time]
+		else:
+			notes_at_time = []
 	else:
 		notes_at_time = get_notes_at_time(data.time)
-		times_cache[data.time] = notes_at_time
 	
 	if not selected_data:
 		for item in selected:
