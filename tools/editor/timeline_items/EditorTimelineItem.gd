@@ -26,7 +26,9 @@ var _drag_last
 
 var widget: HBEditorWidget
 var update_affects_timing_points = false
+
 signal time_changed
+signal time_changed_bulk
 
 var _draw_selected_box = false
 
@@ -56,9 +58,17 @@ func _process(delta):
 			if abs(drag_delta) > 0:
 				editor._change_selected_property_delta("time",  int(drag_delta), self)
 				editor._change_selected_property_delta("end_time",  int(drag_delta), self)
+				
+				emit_signal("time_changed")
+				
+				var ordered_layers := [_layer]
 				for item in editor.selected:
-					item.emit_signal("time_changed")
-#		set_start(clamp(new_time, 0.0, editor.get_song_duration()))
+					if not item._layer in ordered_layers:
+						item.emit_signal("time_changed")
+						
+						ordered_layers.append(item._layer)
+					else:
+						item.emit_signal("time_changed_bulk")
 
 func deselect():
 	_draw_selected_box = false

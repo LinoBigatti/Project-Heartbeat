@@ -23,7 +23,7 @@ func set_style(use_lighter: bool):
 		stylebox.bg_color = Color("#2D3444")
 	else:
 		stylebox.bg_color = Color("#252b38")
-func _sort_timing_points(a: EditorTimelineItem, b: EditorTimelineItem):
+func _sort_timing_points(a: EditorTimelineItem, b: EditorTimelineItem) -> bool:
 	return (a.data.time) < (b.data.time)
 
 func place_child(child: EditorTimelineItem):
@@ -50,8 +50,11 @@ func add_item(item: EditorTimelineItem):
 	item.editor = editor
 	place_child(item)
 	
-	if not item.is_connected("time_changed", Callable(self, "_on_time_changed")):
-		item.connect("time_changed", Callable(self, "_on_time_changed").bind(item))
+	if not item.is_connected("time_changed", self._on_time_changed):
+		item.connect("time_changed",  self._on_time_changed.bind(item))
+	
+	if not item.is_connected("time_changed_bulk", self._on_time_changed_bulk):
+		item.connect("time_changed_bulk",  self._on_time_changed_bulk.bind(item))
 	
 	add_child(item)
 	
@@ -65,7 +68,11 @@ func add_item(item: EditorTimelineItem):
 			item.hide()
 
 func _on_time_changed(child):
-	timing_points.sort_custom(Callable(self, "_sort_timing_points"))
+	timing_points.sort_custom(self._sort_timing_points)
+	
+	place_child(child)
+
+func _on_time_changed_bulk(child):
 	place_child(child)
 
 func remove_item(item: EditorTimelineItem):
