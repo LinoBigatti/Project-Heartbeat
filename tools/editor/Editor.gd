@@ -1117,7 +1117,7 @@ func is_slide_chain(note: HBTimingPoint):
 	
 	return false
 
-func check_for_multi_changes(times: Array, item_cache: Array = []):
+func check_for_multi_changes(times: Array, item_cache: Dictionary = {}):
 	if UserSettings.user_settings.editor_auto_multi:
 		# Merge action with the previous one
 		undo_redo.create_action("MERGE")
@@ -1125,6 +1125,10 @@ func check_for_multi_changes(times: Array, item_cache: Array = []):
 		for time in times:
 			var items_at_time := []
 			if item_cache:
+				if not time in item_cache:
+					# early continue: no notes in full item cache, nothing to do
+					continue
+				
 				items_at_time = item_cache[time]
 			else:
 				items_at_time = get_items_at_time(time)
@@ -1299,15 +1303,12 @@ func cache_notes_at_time() -> Dictionary:
 	
 	return cache
 
-func cache_items_at_time() -> Array:
-	# Initialize our cache
-	var cache := []
-	cache.resize(int(get_song_length() * 1000.0))
-	cache.fill([])
+func cache_items_at_time() -> Dictionary:
+	var cache := {} 
 	
 	for item in get_timeline_items():
-		if item.data is HBTimingPoint and item.data.time <= int(get_song_length() * 1000.0):
-			if not cache[item.data.time]:
+		if item.data is HBTimingPoint:
+			if not item.data.time in cache:
 				cache[item.data.time] = [item]
 			else:
 				cache[item.data.time].append(item)
@@ -2523,7 +2524,7 @@ func get_time_as_eight(time: int) -> float:
 	
 	var idx: int = eight_map.times.bsearch(time)
 	
-	if eight_map.times[idx] == time:
+	if idx in eight_map and eight_map.times[idx] == time:
 		return eight_map.eights[idx]
 	
 	var lower_bound = idx - 1
