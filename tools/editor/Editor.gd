@@ -1574,7 +1574,12 @@ func from_chart(chart: HBChart, ignore_settings = false, importing = false, in_p
 	for layer in chart.layers:
 		var layer_scene
 		var layer_n
+		
 		layer_scene = timeline.find_layer_by_name(layer.name)
+		if not layer_scene:
+			print("ERROR: Could not find corresponding editor layer scene for chart layer \"%s\". Some notes may be lost." % layer.name)
+			continue
+		
 		layer_n = timeline.get_layers().find(layer_scene)
 		
 		for item_d in layer.timing_points:
