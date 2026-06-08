@@ -2525,7 +2525,10 @@ func get_speed_changes() -> Array:
 	return speed_changes
 
 func get_time_as_eight(time: int) -> float:
-	if not eight_map.times:
+	if not eight_map.times or eight_map.times.size() < 2:
+		# We need at least 2 eights to properly interpolate between them. 
+		# Unlikely to happen in reality, as _on_timing_information_changed
+		# adds at least 2 eight indexes per timing change.
 		return 0.0
 	
 	var idx: int = eight_map.times.bsearch(time)
