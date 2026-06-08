@@ -37,6 +37,7 @@ const EDITOR_MODULES_DIR = "res://tools/editor/editor_modules"
 @onready var first_time_message_dialog := get_node("Popups/FirstTimeMessageDialog")
 @onready var info_label = get_node("VBoxContainer/VSplitContainer/EditorTimelineContainer/VBoxContainer/Panel/MarginContainer/HBoxContainer/HBoxContainer/InfoLabel")
 @onready var waveform_button = get_node("VBoxContainer/VSplitContainer/HSplitContainer/HSplitContainer/Preview/GamePreview/Node2D/WidgetArea/Panel/HBoxContainer/WaveformButton")
+@onready var sfx_button = get_node("VBoxContainer/VSplitContainer/HSplitContainer/HSplitContainer/Preview/GamePreview/Node2D/WidgetArea/Panel/HBoxContainer/SfxButton")
 @onready var timeline_snap_button = get_node("VBoxContainer/VSplitContainer/EditorTimelineContainer/VBoxContainer/Panel/MarginContainer/HBoxContainer/TimelineGridSnapButton")
 @onready var show_bg_button = get_node("VBoxContainer/VSplitContainer/HSplitContainer/HSplitContainer/Preview/GamePreview/Node2D/WidgetArea/Panel/HBoxContainer/ShowBGButton")
 @onready var show_video_button = get_node("VBoxContainer/VSplitContainer/HSplitContainer/HSplitContainer/Preview/GamePreview/Node2D/WidgetArea/Panel/HBoxContainer/ShowVideoButton")
@@ -1469,6 +1470,7 @@ func load_settings(settings: HBPerSongEditorSettings, skip_settings_menu=false):
 
 func update_user_settings():
 	waveform_button.button_pressed = UserSettings.user_settings.editor_show_waveform
+	sfx_button.button_pressed = rhythm_game.sfx_enabled
 	
 	grid_snap_button.button_pressed = UserSettings.user_settings.editor_grid_snap
 	show_grid_button.button_pressed = UserSettings.user_settings.editor_show_grid
